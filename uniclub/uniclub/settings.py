@@ -28,11 +28,13 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "corsheaders",
     "phonenumber_field",
-    "django_celery_beat",
-    "rosetta",
+    # "rosetta",
 ]
 
-LOCAL_APPS = []
+LOCAL_APPS = [
+    "apps.products.apps.ProductsConfig",
+    "apps.website.apps.WebsiteConfig",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -106,7 +108,6 @@ USE_L10N = True
 USE_TZ = True
 
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
@@ -115,9 +116,11 @@ STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        # "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_PERMISSION_CLASSES": [
+        # "rest_framework.permissions.IsAuthenticated"
+    ],
     "DATETIME_FORMAT": "%Y-%m-%dT%H:%M",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
