@@ -28,7 +28,7 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "corsheaders",
     "phonenumber_field",
-    "django_celery_beat",
+   # "django_celery_beat",
     "rosetta",
 ]
 
