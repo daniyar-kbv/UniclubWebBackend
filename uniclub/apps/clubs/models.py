@@ -3,7 +3,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Address(models.Model):
-    name = models.CharField("Адрес", max_length=256, null=True, blank=True)
+    address = models.CharField("Адрес", max_length=256, null=True, blank=True)
     longitude = models.CharField("Долгота", max_length=26)
     latitude = models.CharField("Широта", max_length=26)
 
@@ -71,7 +71,7 @@ class Club(ContactInfo, AdditionalInformation):
     image = models.ImageField(
         "Основная фотография клуба"
     )
-    full_name = models.CharField(
+    short_description = models.CharField(
         "Краткое описание", max_length=256, null=True, blank=True
     )
     description = models.TextField(
