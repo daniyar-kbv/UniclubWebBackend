@@ -1,5 +1,15 @@
 from django.contrib import admin
 
-from .models import Club
+from .models import Club, ClubImage
 
-admin.site.register(Club)
+
+class ClubImageInline(admin.StackedInline):
+    extra = 0
+    model = ClubImage
+
+
+class ClubAdmin(admin.ModelAdmin):
+    inlines = ClubImageInline,
+
+
+admin.site.register(Club, ClubAdmin)
