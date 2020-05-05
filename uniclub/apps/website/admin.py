@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import FAQ, PartnerFeedBack, FeedBack
+
+admin.site.register(FAQ)
+admin.site.register(PartnerFeedBack)
+admin.site.register(FeedBack)
