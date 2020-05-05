@@ -4,8 +4,8 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 class Address(models.Model):
     address = models.CharField("Адрес", max_length=256, null=True, blank=True)
-    longitude = models.CharField("Долгота", max_length=26)
-    latitude = models.CharField("Широта", max_length=26)
+    longitude = models.CharField("Долгота", max_length=26, null=True, blank=True)
+    latitude = models.CharField("Широта", max_length=26, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -69,7 +69,7 @@ class Club(ContactInfo, AdditionalInformation):
         "Название", max_length=52, null=True, blank=True, db_index=True
     )
     image = models.ImageField(
-        "Основная фотография клуба"
+        "Основная фотография клуба", upload_to="club_images/", null=True, blank=True
     )
     short_description = models.CharField(
         "Краткое описание", max_length=256, null=True, blank=True
@@ -83,3 +83,8 @@ class Club(ContactInfo, AdditionalInformation):
     club_students_achievements = models.TextField(
         "Достижения студентов клуба", null=True, blank=True
     )
+
+
+class ClubImage(models.Model):
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="club_images/")
