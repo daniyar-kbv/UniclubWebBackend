@@ -65,6 +65,10 @@ class AdditionalInformation(models.Model):
 
 
 class Club(ContactInfo, AdditionalInformation):
+    class Meta:
+        verbose_name = "Клубы"
+        verbose_name_plural = "Клуб"
+
     name = models.CharField(
         "Название", max_length=52, null=True, blank=True, db_index=True
     )
@@ -83,6 +87,9 @@ class Club(ContactInfo, AdditionalInformation):
     club_students_achievements = models.TextField(
         "Достижения студентов клуба", null=True, blank=True
     )
+
+    def __str__(self):
+        return self.name
 
 
 class ClubImage(models.Model):
