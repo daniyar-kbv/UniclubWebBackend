@@ -9,7 +9,7 @@ SECRET_KEY = 'h&jxpswi*y%lij@2i)8cv^eq4r3ro2%+(9cw9in+h9e4vd6#zi'
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
+USE_X_FORWARDED_HOST = True
 
 # Application definition
 
