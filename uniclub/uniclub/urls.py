@@ -1,10 +1,10 @@
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-
 
 admin.site.site_header = "uniclub"
 admin.site.index_title = "Панель управления"
@@ -45,3 +45,5 @@ urlpatterns = [
     ),
     path("", include("apps.urls")),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
