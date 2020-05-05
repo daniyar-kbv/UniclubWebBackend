@@ -1,9 +1,17 @@
 from rest_framework import serializers
 
-from .models import Club
+from .models import Club, ClubImage
+
+
+class ClubImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClubImage
+        fields = "image",
 
 
 class ClubRetrieveSerializer(serializers.ModelSerializer):
+    images = ClubImageSerializer(many=True)
+
     class Meta:
         model = Club
         fields = "__all__"

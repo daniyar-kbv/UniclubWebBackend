@@ -93,5 +93,5 @@ class Club(ContactInfo, AdditionalInformation):
 
 
 class ClubImage(models.Model):
-    club = models.ForeignKey(Club, on_delete=models.CASCADE)
+    club = models.ForeignKey(Club, related_name="images", on_delete=models.CASCADE)
     image = models.ImageField(upload_to="club_images/")
