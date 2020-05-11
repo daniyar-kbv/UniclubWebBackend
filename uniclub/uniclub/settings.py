@@ -35,6 +35,7 @@ LOCAL_APPS = [
     "apps.products.apps.ProductsConfig",
     "apps.website.apps.WebsiteConfig",
     "apps.clubs.apps.ClubsConfig",
+    "apps.person.apps.PersonConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
