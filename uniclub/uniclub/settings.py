@@ -32,6 +32,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "apps.authentication.apps.AuthenticationConfig",
     "apps.products.apps.ProductsConfig",
     "apps.website.apps.WebsiteConfig",
     "apps.clubs.apps.ClubsConfig",

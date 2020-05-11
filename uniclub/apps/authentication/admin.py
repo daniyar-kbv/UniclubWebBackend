@@ -1,3 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
+
+admin.site.unregister(BlacklistedToken)
+admin.site.unregister(OutstandingToken)
