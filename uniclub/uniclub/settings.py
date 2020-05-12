@@ -126,10 +126,10 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # "rest_framework_simplejwt.authentication.JWTAuthentication"
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        # "rest_framework.permissions.IsAuthenticated"
+        "rest_framework.permissions.IsAuthenticated"
     ],
     "DATETIME_FORMAT": "%Y-%m-%dT%H:%M",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
