@@ -1,9 +1,10 @@
 from django.db import models
 
 from apps.clubs.models import Club
+from apps.core.models import NameModel
 
 
-class Coach(models.Model):
+class Coach(NameModel):
     class Meta:
         verbose_name = "Тренеры"
         verbose_name_plural = "Тренер"
@@ -11,8 +12,7 @@ class Coach(models.Model):
     club = models.ForeignKey(
         Club, related_name="coaches", on_delete=models.CASCADE
     )
-    full_name = models.CharField(max_length=256)
-    image = models.ImageField(upload_to="coach/")
+    image = models.ImageField("Фотография", upload_to="coach/")
 
     def __str__(self):
         return self.full_name

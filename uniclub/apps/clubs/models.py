@@ -1,5 +1,9 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+
 from phonenumber_field.modelfields import PhoneNumberField
+
+User = get_user_model()
 
 
 class Address(models.Model):
@@ -69,6 +73,9 @@ class Club(ContactInfo, AdditionalInformation):
         verbose_name = "Клубы"
         verbose_name_plural = "Клуб"
 
+    club_admin = models.OneToOneField(
+       User, on_delete=models.PROTECT, related_name="club", null=True,
+    )
     name = models.CharField(
         "Название", max_length=52, null=True, blank=True, db_index=True
     )
@@ -89,7 +96,7 @@ class Club(ContactInfo, AdditionalInformation):
     )
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class ClubImage(models.Model):

@@ -37,6 +37,8 @@ LOCAL_APPS = [
     "apps.website.apps.WebsiteConfig",
     "apps.clubs.apps.ClubsConfig",
     "apps.person.apps.PersonConfig",
+    "apps.core.apps.CoreConfig",
+    "apps.users.apps.UsersConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -53,6 +55,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'uniclub.urls'
+AUTH_USER_MODEL = "users.User"
 
 TEMPLATES = [
     {
