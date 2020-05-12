@@ -28,3 +28,9 @@ class ClubListSerializer(serializers.ModelSerializer):
             "latitude",
             "image",
         )
+
+
+class ClubUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Club
+        exclude = "club_admin",
