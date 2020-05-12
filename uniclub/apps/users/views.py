@@ -21,6 +21,4 @@ class PartnerAPIMixin:
         return self._club
 
     def get_object(self):
-        if not self.club:
-            return None
-        return self._club
+        return self.club
