@@ -74,3 +74,6 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError("Users must have an email address")
         return self.create_user(**kwargs)
+
+    def get_by_natural_key(self, username):
+        return self.get(email=username)
