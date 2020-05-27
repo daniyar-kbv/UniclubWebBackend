@@ -12,7 +12,7 @@ class Coach(NameModel):
     club = models.ForeignKey(
         Club, related_name="coaches", on_delete=models.CASCADE
     )
-    image = models.ImageField("Фотография", upload_to="coach/")
+    image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
 
     def __str__(self):
         return self.full_name
