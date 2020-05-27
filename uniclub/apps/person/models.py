@@ -10,7 +10,7 @@ class Coach(NameModel):
         verbose_name_plural = "Тренер"
 
     club = models.ForeignKey(
-        Club, related_name="coaches", on_delete=models.CASCADE
+        Club, related_name="coaches", on_delete=models.CASCADE, verbose_name="Клуб"
     )
     image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
 
