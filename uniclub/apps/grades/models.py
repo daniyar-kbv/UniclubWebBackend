@@ -1,6 +1,7 @@
 from django.db import models
 
 from apps.core.models import TimestampModel
+from apps.clubs.models import Club
 
 from . import Levels, Intensities
 
@@ -10,6 +11,12 @@ class Grade(TimestampModel):
         verbose_name = "Классы"
         verbose_name_plural = "Класс"
 
+    club = models.ForeignKey(
+        Club,
+        related_name="grades",
+        verbose_name="Клуб",
+        on_delete=models.CASCADE
+    )
     name = models.CharField("Название", max_length=120)
 
     def __str__(self):
