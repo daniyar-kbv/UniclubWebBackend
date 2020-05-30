@@ -8,6 +8,8 @@ static
 # C extensions
 *.so
 
+# env
+uni_env/
 # Distribution / packaging
 .Python
 build/
