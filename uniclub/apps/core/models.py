@@ -23,3 +23,14 @@ class TimestampModel(models.Model):
 
     created_at = models.DateTimeField("Создан", default=timezone.now)
     updated_at = models.DateTimeField("Обновлен", auto_now=True)
+
+
+class CityModel(models.Model):
+    class Meta:
+        verbose_name = "Города"
+        verbose_name_plural = "Город"
+
+    name = models.CharField("Название", max_length=256)
+
+    def __str__(self):
+        return self.name
