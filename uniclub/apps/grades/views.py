@@ -15,7 +15,7 @@ class GradeViewSet(PartnerAPIMixin, ModelViewSet):
         return Grade.objects.filter(club=self.get_object())
 
     def perform_create(self, serializer):
-        serializer.save(club=self.get_object())
+        serializer.save(club=self.get_club())
 
 
 class LessonViewSet(PartnerAPIMixin, ModelViewSet):
@@ -24,7 +24,7 @@ class LessonViewSet(PartnerAPIMixin, ModelViewSet):
 
     def get_grade(self):
         return get_object_or_404(
-            Grade, pk=self.kwargs.get("grade_pk"), club=self.get_object()
+            Grade, pk=self.kwargs.get("grade_pk"), club=self.get_club()
         )
 
     def get_queryset(self):

@@ -12,7 +12,7 @@ class CoachViewset(PartnerAPIMixin, ModelViewSet):
     serializer_class = CoachSerializer
 
     def get_queryset(self):
-        return Coach.objects.filter(club=self.get_object())
+        return Coach.objects.filter(club=self.get_club())
 
     def perform_create(self, serializer):
-        serializer.save(club=self.get_object())
+        serializer.save(club=self.get_club())
