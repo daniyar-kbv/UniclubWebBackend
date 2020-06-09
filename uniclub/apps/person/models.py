@@ -1,4 +1,5 @@
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 from apps.clubs.models import Club
 from apps.core.models import NameModel, CityModel
@@ -29,3 +30,20 @@ class ClientProfile(models.Model):
     )
     sex = models.CharField("Пол", choices=Gender.choices, max_length=20)
     birth_date = models.DateTimeField(null=True, blank=True)
+
+
+class ClientChildren(NameModel):
+    parent = models.ForeignKey(
+        ClientProfile,
+        verbose_name="Родитель",
+        on_delete=models.PROTECT,
+    )
+    image = models.ImageField(
+        "Фотография", upload_to="children/", null=True, blank=True
+    )
+    mobile_phone = PhoneNumberField("Мобильный телефон")
+    email = models.EmailField("Почта", null=True, blank=True)
+    sex = models.CharField("Пол", choices=Gender.choices, max_length=20)
+    city = models.ForeignKey(
+        CityModel, on_delete=models.SET_NULL, null=True, verbose_name="Город"
+    )
