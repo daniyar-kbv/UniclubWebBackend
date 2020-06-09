@@ -20,5 +20,5 @@ class PartnerAPIMixin:
                 self._club = user.club
         return self._club
 
-    def get_object(self):
+    def get_club(self):
         return self.club

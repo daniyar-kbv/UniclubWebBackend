@@ -36,7 +36,7 @@ class ClubUpdateView(
         responses={200: ClubUpdateSerializer}
     )
     def get(self, request, *args, **kwargs):
-        instance = self.get_object()
+        instance = self.get_club()
         serializer = ClubUpdateSerializer(instance)
 
         return Response(serializer.data)
@@ -45,7 +45,7 @@ class ClubUpdateView(
         request_body=ClubUpdateSerializer, responses={200: ClubUpdateSerializer}
     )
     def post(self, request, *args, **kwargs):
-        instance = self.get_object()
+        instance = self.get_club()
         serializer = ClubUpdateSerializer(data=request.data, instance=instance, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
