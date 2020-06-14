@@ -28,7 +28,6 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "corsheaders",
     "phonenumber_field",
-    # "rosetta",
 ]
 
 LOCAL_APPS = [
@@ -40,6 +39,7 @@ LOCAL_APPS = [
     "apps.core.apps.CoreConfig",
     "apps.users.apps.UsersConfig",
     "apps.grades.apps.GradesConfig",
+    "apps.sms.apps.SmsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -180,3 +180,8 @@ LOGGING = {
     "handlers": {"console": {"level": "DEBUG", "class": "logging.StreamHandler"}},
     "loggers": {"django.db.backends": {"handlers": ["console"], "level": "INFO"}},
 }
+
+# SMS
+KAZINFO_URL = 'http://kazinfoteh.org:9507/api'
+KAZINFO_USERNAME = os.environ.get('KAZ_INFO_USERNAME', 'juniklab1')
+KAZINFO_PASSWORD = os.environ.get('KAZ_INFO_PASSWORD', 'jdDZ1NcK1')
