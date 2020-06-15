@@ -181,7 +181,13 @@ LOGGING = {
     "loggers": {"django.db.backends": {"handlers": ["console"], "level": "INFO"}},
 }
 
+HOTP_KEY = base64.b32encode(SECRET_KEY.encode("utf-8"))
+
 # SMS
 KAZINFO_URL = 'http://kazinfoteh.org:9507/api'
 KAZINFO_USERNAME = os.environ.get('KAZ_INFO_USERNAME', 'juniklab1')
 KAZINFO_PASSWORD = os.environ.get('KAZ_INFO_PASSWORD', 'jdDZ1NcK1')
+
+# OTP settings
+OTP_LENGTH = 4
+OTP_VALIDITY_PERIOD = 10 # in minutes
