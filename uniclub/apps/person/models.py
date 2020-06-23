@@ -67,6 +67,7 @@ class ClientChildren(NameModel):
     city = models.ForeignKey(
         CityModel, on_delete=models.SET_NULL, null=True, verbose_name="Город"
     )
+    birth_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.full_name
