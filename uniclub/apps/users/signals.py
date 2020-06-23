@@ -12,3 +12,7 @@ def create_user(sender, instance, created, **kwargs):
     if created and instance.user_type == UserTypes.PARTNER:
         from apps.clubs.models import Club
         Club.objects.create(club_admin=instance)
+
+    if created and instance.user_type == UserTypes.CLIENT:
+        from apps.person.models import ClientProfile
+        ClientProfile.objects.create(user=instance)
