@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from .models import CityModel
+
 
 class HiddenAdmin(admin.ModelAdmin):
     def get_model_perms(self, request):
@@ -14,3 +16,6 @@ class ChangeOnlyMixin:
 class ReadOnlyMixin(ChangeOnlyMixin):
     def has_change_permission(self, request, obj=None):
         return False
+
+
+admin.site.register(CityModel)
