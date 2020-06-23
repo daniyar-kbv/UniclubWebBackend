@@ -3,6 +3,7 @@ from typing import List, Optional
 from django.shortcuts import render
 
 from apps.clubs.models import Club
+from apps.person.models import ClientProfile
 
 from .permissions import IsPartner, IsClient
 
@@ -26,3 +27,16 @@ class PartnerAPIMixin:
 
 class ClientAPIMixin:
     permission_classes = (IsClient,)
+    related_fields: List[str] = []
+    _profile: Optional[ClientProfile] = None
+
+    @property
+    def profile(self):
+        if not self._profile:
+            user = self.request.user
+            if hasattr(user, "profile"):
+                self._profile = user.profile
+        return self._profile
+
+    def get_profile(self):
+        return self.profile
