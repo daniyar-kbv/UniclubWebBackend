@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from apps.clubs.models import Club
 
-from .permissions import IsPartner
+from .permissions import IsPartner, IsClient
 
 
 class PartnerAPIMixin:
@@ -22,3 +22,7 @@ class PartnerAPIMixin:
 
     def get_club(self):
         return self.club
+
+
+class ClientAPIMixin:
+    permission_classes = (IsClient,)

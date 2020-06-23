@@ -11,3 +11,15 @@ class IsPartner(BasePermission):
             )
 
         return False
+
+
+class IsClient(BasePermission):
+    def has_permission(self, request, view):
+        if request.user:
+            return bool(
+                hasattr(request.user, "profile")
+                and request.user.is_active
+                and request.user.is_authenticated
+            )
+
+        return False
