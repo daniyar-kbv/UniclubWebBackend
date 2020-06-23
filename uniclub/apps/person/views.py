@@ -8,8 +8,12 @@ from rest_framework.response import Response
 
 from apps.users.views import PartnerAPIMixin, ClientAPIMixin
 
-from .serializers import CoachSerializer, ClientProfileUpdateSerializer
-from .models import Coach
+from .models import Coach, ClientChildren, ClientProfile
+from .serializers import (
+    CoachSerializer,
+    ClientProfileUpdateSerializer,
+    ClientChildrenSerializer
+)
 
 User = get_user_model()
 
@@ -37,3 +41,14 @@ class UpdateClientProfileView(ClientAPIMixin, APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class ChildrenViewSet(ClientAPIMixin, ModelViewSet):
+    queryset = ClientChildren.objects.all()
+    serializer_class = ClientChildrenSerializer
+
+    def get_queryset(self):
+        return ClientChildren.objects.filter(parent=self.get_profile())
+
+    def perform_create(self, serializer):
+        serializer.save(parent=self.get_profile())

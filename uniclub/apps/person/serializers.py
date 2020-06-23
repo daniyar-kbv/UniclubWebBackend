@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Coach, ClientProfile
+from .models import Coach, ClientProfile, ClientChildren
 
 User = get_user_model()
 
@@ -46,3 +46,11 @@ class ClientProfileUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         return super().update(instance, validated_data)
 
+
+class ClientChildrenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientChildren
+        fields = "__all__"
+        extra_kwargs = {
+            "parent": {"required": False}
+        }
