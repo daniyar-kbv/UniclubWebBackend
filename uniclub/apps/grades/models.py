@@ -58,7 +58,7 @@ class Lesson(ClassDays):
         Grade,
         verbose_name="Класс",
         on_delete=models.CASCADE,
-        related_name="grades"
+        related_name="lessons"
     )
     name = models.CharField("Название", max_length=120)
     description = models.TextField("Описание", null=True)
