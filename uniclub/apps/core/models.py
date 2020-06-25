@@ -24,6 +24,14 @@ class TimestampModel(models.Model):
     created_at = models.DateTimeField("Создан", default=timezone.now)
     updated_at = models.DateTimeField("Обновлен", auto_now=True)
 
+    @property
+    def created_at_pretty(self):
+        return self.created_at.strftime("%d/%m/%Y %H:%M:%S")
+
+    @property
+    def updated_at_pretty(self):
+        return self.updated_at.strftime("%d/%m/%Y %H:%M:%S")
+
 
 class CityModel(models.Model):
     class Meta:
