@@ -8,4 +8,4 @@ from .serializers import UniPassSerializer
 
 class UniPassListView(PublicAPIMixin, ListAPIView):
     serializer_class = UniPassSerializer
-    queryset = UniPass.objects.all()
+    queryset = UniPass.objects.prefetch_related("benefits")

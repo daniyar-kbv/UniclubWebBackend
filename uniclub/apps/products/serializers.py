@@ -6,7 +6,7 @@ from .models import UniPass, Benefits
 class BenefitsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Benefits
-        fields = "__all__"
+        fields = "name",
 
 
 class UniPassSerializer(serializers.ModelSerializer):

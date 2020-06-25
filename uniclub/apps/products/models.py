@@ -21,7 +21,7 @@ class UniPass(models.Model):
     price = models.DecimalField("Цена", max_digits=12, decimal_places=2)
     days_amount = models.PositiveSmallIntegerField("Количество дней", default=0)
     visits_amount = models.PositiveSmallIntegerField("Количество посещении", default=0)
-    benefits = models.ManyToManyField(Benefits, verbose_name="Преимущества", null=True, blank=True)
+    benefits = models.ManyToManyField(Benefits, verbose_name="Преимущества", blank=True)
 
     def __str__(self):
         return self.name
