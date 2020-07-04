@@ -14,3 +14,8 @@ class Intensities(TextChoices):
     LOW = "LOW", "Низкая"
     MEDIUM = "MEDIUM", "Средняя"
     HIGH = "HIGH", "Высокая"
+
+
+class Durations(TextChoices):
+    PERIODIC = "PERIODIC", "Периодичный"
+    LONG = "LONG", "Продолжительный"
