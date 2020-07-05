@@ -56,6 +56,7 @@ class ClientChildren(NameModel):
     parent = models.ForeignKey(
         ClientProfile,
         verbose_name="Родитель",
+        related_name="children",
         on_delete=models.PROTECT,
     )
     image = models.ImageField(

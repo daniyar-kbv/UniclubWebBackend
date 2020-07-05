@@ -36,9 +36,21 @@ class Subscription(TimestampModel):
         related_name="subcriptions",
         verbose_name="Пользователь"
     )
+    visits_amount = models.PositiveSmallIntegerField(
+        "Количество посещении", default=0
+    )
 
     start_date = models.DateField("Начало подписки")
     end_date = models.DateField("Конец подписки")
+
+    def add_history_record(self, operation: str) -> None:
+        SubscriptionHistoryRecord.objects.create(
+            subscription=self,
+            operation=operation
+        )
+
+    def __str__(self):
+        return f"({self.id}) {self.product.name}"
 
 
 class SubscriptionHistoryRecord(TimestampModel):
@@ -51,6 +63,3 @@ class SubscriptionHistoryRecord(TimestampModel):
     operation = models.CharField(
         "Операция", max_length=256, choices=SubscriptionOperations.choices
     )
-
-    def __str__(self):
-        return f"{self.operation} ({self.subscription})"

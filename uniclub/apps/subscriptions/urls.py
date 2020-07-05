@@ -1,5 +1,7 @@
 from django.urls import path
 
-urlpatterns = [
+from .views import SubscribeView
 
+urlpatterns = [
+    path("registration", SubscribeView.as_view()),
 ]
