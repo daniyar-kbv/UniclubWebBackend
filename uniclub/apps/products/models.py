@@ -16,8 +16,8 @@ class Benefits(models.Model):
 
 class Product(models.Model):
     class Meta:
-        verbose_name = "Товары"
-        verbose_name_plural = "Товар"
+        verbose_name = "Товар"
+        verbose_name_plural = "Товары"
 
     name = models.CharField("Название", max_length=256)
     product_type = models.CharField(
