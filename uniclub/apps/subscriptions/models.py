@@ -88,6 +88,3 @@ class FreezeRequest(TimestampModel):
         default=FreezeRequestDesicion.NOT_PROCESSED,
         max_length=25
     )
-
-    def __str__(self):
-        return self.customer.full_name
