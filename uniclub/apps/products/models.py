@@ -1,5 +1,7 @@
 from django.db import models
 
+from . import ProductType
+
 
 class Benefits(models.Model):
     class Meta:
@@ -12,16 +14,20 @@ class Benefits(models.Model):
         return self.name
 
 
-class UniPass(models.Model):
+class Product(models.Model):
     class Meta:
-        verbose_name = "Тариф"
-        verbose_name_plural = "Тарифы"
+        verbose_name = "Товары"
+        verbose_name_plural = "Товар"
 
-    name = models.CharField("Название", max_length=56)
-    price = models.DecimalField("Цена", max_digits=12, decimal_places=2)
+    name = models.CharField("Название", max_length=256)
+    product_type = models.CharField(
+        "Тип продукта",
+        choices=ProductType.choices,
+        max_length=25
+    )
+    price = models.DecimalField("Стоимость", max_digits=12, decimal_places=2)
     days_amount = models.PositiveSmallIntegerField("Количество дней", default=0)
     visits_amount = models.PositiveSmallIntegerField("Количество посещении", default=0)
-    benefits = models.ManyToManyField(Benefits, verbose_name="Преимущества", blank=True)
 
     def __str__(self):
         return self.name

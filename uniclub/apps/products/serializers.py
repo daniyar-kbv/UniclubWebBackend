@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import UniPass, Benefits
+from .models import Benefits, Product
 
 
 class BenefitsSerializer(serializers.ModelSerializer):
@@ -9,9 +9,7 @@ class BenefitsSerializer(serializers.ModelSerializer):
         fields = "name",
 
 
-class UniPassSerializer(serializers.ModelSerializer):
-    benefits = BenefitsSerializer(many=True)
-
+class ProductSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UniPass
+        model = Product
         fields = "__all__"

@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 from apps.core.models import TimestampModel
-from apps.products.models import UniPass
+# from apps.products.models import UniPass
 from apps.person.models import ClientChildren
 
 User = get_user_model()
@@ -16,12 +16,12 @@ class Subscription(TimestampModel):
         verbose_name_plural = "Подписки UniPass"
 
     id = models.UUIDField(default=uuid4, primary_key=True)
-    unipass = models.ForeignKey(
-        UniPass,
-        on_delete=models.PROTECT,
-        related_name="subscriptions",
-        verbose_name="UniPass"
-    )
+    # unipass = models.ForeignKey(
+    #     UniPass,
+    #     on_delete=models.PROTECT,
+    #     related_name="subscriptions",
+    #     verbose_name="UniPass"
+    # )
     customer = models.ForeignKey(
         User,
         on_delete=models.PROTECT,

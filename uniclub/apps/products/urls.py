@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import UniPassListView
+from .views import ProductListView
 
 urlpatterns = [
-    path("subscriptions/", UniPassListView.as_view()),
+    path("", ProductListView.as_view()),
 ]
