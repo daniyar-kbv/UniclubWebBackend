@@ -85,6 +85,10 @@ class Course(FreePlacesMixin, TimestampModel):
 
 
 class LessonDay(models.Model):
+    class Meta:
+        verbose_name = "Дни занятии"
+        verbose_name_plural = "День занятия"
+
     course = models.ForeignKey(
         Course,
         related_name="lesson_days",
@@ -134,7 +138,7 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
                 "start_time": lesson_day.start_time,
                 "end_time": lesson_day.end_time
             }
-            for lesson_day in cast(Iterable[LessonDay], couse.lesson_days.all())
+            for lesson_day in cast(Iterable[LessonDay], course.lesson_days.all())
         }
 
         while start_date <= end_date:
