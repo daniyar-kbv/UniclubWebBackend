@@ -7,7 +7,7 @@ from apps.core.models import TimestampModel
 from apps.person.models import ClientChildren
 from apps.products.models import Product
 
-from . import SubscriptionOperations
+from . import SubscriptionOperations, FreezeRequestDesicion
 
 User = get_user_model()
 
@@ -63,3 +63,31 @@ class SubscriptionHistoryRecord(TimestampModel):
     operation = models.CharField(
         "Операция", max_length=256, choices=SubscriptionOperations.choices
     )
+
+
+class FreezeRequest(TimestampModel):
+    class Meta:
+        verbose_name = "Запрос на заморозку подписки"
+        verbose_name_plural = "Запросы на заморозку абонемента"
+
+    subscription = models.ForeignKey(
+        Subscription,
+        on_delete=models.CASCADE,
+        related_name="freeze_requests",
+        verbose_name="Подписка"
+    )
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="freeze_requests",
+        verbose_name="Покупатель"
+    )
+    desicion = models.CharField(
+        "Решение",
+        choices=FreezeRequestDesicion.choices,
+        default=FreezeRequestDesicion.NOT_PROCESSED,
+        max_length=25
+    )
+
+    def __str__(self):
+        return self.customer.full_name
