@@ -3,8 +3,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from apps.users.views import PartnerAPIMixin
 
-from .models import Grade
-from .serializers import GradeSerializer
+from .models import Grade, Course
+from .serializers import GradeSerializer, CourseSerializer
 
 
 class GradeViewSet(PartnerAPIMixin, ModelViewSet):
@@ -18,17 +18,17 @@ class GradeViewSet(PartnerAPIMixin, ModelViewSet):
         serializer.save(club=self.get_club())
 
 
-# class LessonViewSet(PartnerAPIMixin, ModelViewSet):
-#     queryset = Lesson.objects.all()
-#     serializer_class = LessonSerializer
-#
-#     def get_grade(self):
-#         return get_object_or_404(
-#             Grade, pk=self.kwargs.get("grade_pk"), club=self.get_club()
-#         )
-#
-#     def get_queryset(self):
-#         return Lesson.objects.filter(grade=self.get_grade())
-#
-#     def perform_create(self, serializer):
-#         serializer.save(grade=self.get_grade())
+class CourseViewSet(PartnerAPIMixin, ModelViewSet):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+
+    def get_grade(self):
+        return get_object_or_404(
+            Grade, pk=self.kwargs.get("grade_pk"), club=self.get_club()
+        )
+
+    def get_queryset(self):
+        return Course.objects.filter(grade=self.get_grade())
+
+    def perform_create(self, serializer):
+        serializer.save(grade=self.get_grade())
