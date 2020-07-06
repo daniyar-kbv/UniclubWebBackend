@@ -1,10 +1,17 @@
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import SuspiciousOperation
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import ListAPIView
+
 
 from apps.users.views import PartnerAPIMixin
+from apps.core.views import PublicAPIMixin
 
-from .models import Grade, Course
-from .serializers import GradeSerializer, CourseSerializer
+from .models import Grade, Course, Lesson
+from .serializers import (
+    GradeSerializer, CourseSerializer, LessonSerializer
+)
 
 
 class GradeViewSet(PartnerAPIMixin, ModelViewSet):
@@ -32,3 +39,10 @@ class CourseViewSet(PartnerAPIMixin, ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(grade=self.get_grade())
+
+
+class LessonViewSet(PublicAPIMixin, ListAPIView):
+    filter_backends = [DjangoFilterBackend]
+    queryset = Lesson.objects.all()
+    filterset_fields = ["day"]
+    serializer_class = LessonSerializer

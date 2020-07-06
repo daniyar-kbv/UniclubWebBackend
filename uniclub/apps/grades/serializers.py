@@ -4,6 +4,24 @@ from rest_framework import serializers
 from .models import Grade, Course, LessonDay, Lesson
 
 
+class GradeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = (
+            "name",
+            "price",
+            "level"
+        )
+
+
+class LessonSerializer(serializers.ModelSerializer):
+    course = GradeListSerializer()
+
+    class Meta:
+        model = Lesson
+        fields = "__all__"
+
+
 class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
