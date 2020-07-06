@@ -8,7 +8,13 @@ from apps.person.serializers import ClientChildrenSerializer
 from apps.products.models import Product
 
 from .import SubscriptionOperations
-from .models import Subscription
+from .models import Subscription, FreezeRequest
+
+
+class FreezeRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FreezeRequest
+        fields = "__all__"
 
 
 class SubscriptionListSerializer(serializers.ModelSerializer):

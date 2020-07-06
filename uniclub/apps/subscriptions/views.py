@@ -6,7 +6,9 @@ from apps.users.views import ClientAPIMixin
 
 from .models import Subscription, FreezeRequest
 from .serializers import (
-    SubscriptionCreateSerializer, SubscriptionListSerializer
+    SubscriptionCreateSerializer,
+    SubscriptionListSerializer,
+    FreezeRequestSerializer
 )
 
 
@@ -30,3 +32,10 @@ class SubscribeListView(ClientAPIMixin, ListAPIView):
 
     def get_queryset(self):
         return Subscription.objects.filter(customer=self.request.user)
+
+
+class FreezeRequestListView(ClientAPIMixin, APIView):
+    serializer_class = FreezeRequestSerializer
+
+    def get_queryset(self):
+        return FreezeRequest.objects.filter(customer=self.request.user)
