@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Coach, ClientProfile, ClientChildren
+from .models import (
+    Coach, ClientProfile, ClientChildren
+)
 
 User = get_user_model()
 

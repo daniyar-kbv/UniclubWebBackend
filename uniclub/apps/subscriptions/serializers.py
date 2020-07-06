@@ -4,10 +4,19 @@ from rest_framework import serializers
 from django.db.transaction import atomic
 
 from apps.users.models import User
+from apps.person.serializers import ClientChildrenSerializer
 from apps.products.models import Product
 
 from .import SubscriptionOperations
 from .models import Subscription
+
+
+class SubscriptionListSerializer(serializers.ModelSerializer):
+    child = ClientChildrenSerializer()
+
+    class Meta:
+        model = Subscription
+        fields = "__all__"
 
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):

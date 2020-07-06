@@ -1,11 +1,13 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 
 from apps.users.views import ClientAPIMixin
 
 from .models import Subscription, FreezeRequest
-from .serializers import SubscriptionCreateSerializer
+from .serializers import (
+    SubscriptionCreateSerializer, SubscriptionListSerializer
+)
 
 
 class SubscribeView(ClientAPIMixin, CreateAPIView):
@@ -21,3 +23,10 @@ class FreezeRequestView(ClientAPIMixin, APIView):
         )
 
         return Response(status=201)
+
+
+class SubscribeListView(ClientAPIMixin, ListAPIView):
+    serializer_class = SubscriptionListSerializer
+
+    def get_queryset(self):
+        return Subscription.objects.filter(customer=self.request.user)
