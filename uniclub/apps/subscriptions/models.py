@@ -7,7 +7,9 @@ from apps.core.models import TimestampModel
 from apps.person.models import ClientChildren
 from apps.products.models import Product
 
-from . import SubscriptionOperations, FreezeRequestDesicion
+from . import (
+    SubscriptionOperations, FreezeRequestDesicion, SubscriptionStatuses
+)
 
 User = get_user_model()
 
@@ -38,6 +40,12 @@ class Subscription(TimestampModel):
     )
     visits_amount = models.PositiveSmallIntegerField(
         "Количество посещении", default=0
+    )
+    status = models.CharField(
+        "Статус подписки",
+        max_length=20,
+        choices=SubscriptionStatuses.choices,
+        default=SubscriptionStatuses.ACTIVE
     )
 
     start_date = models.DateField("Начало подписки")
