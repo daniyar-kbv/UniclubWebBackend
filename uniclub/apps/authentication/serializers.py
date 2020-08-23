@@ -7,6 +7,8 @@ from rest_framework_simplejwt.serializers import (
 from rest_framework_simplejwt.serializers import PasswordField
 from phonenumber_field.serializerfields import PhoneNumberField
 
+from apps.sms.services import verify_otp
+
 User = get_user_model()
 
 
@@ -68,3 +70,12 @@ class RegisterAccountSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user, created = User.objects.get_or_create(**validated_data)
         return user
+
+
+class VerifyOTPSerializer(serializers.Serializer):
+    code = serializers.CharField(label="OTP код")
+    mobile_phone = PhoneNumberField(label="Номер телефона", required=False)
+
+    def validate(self, attrs):
+        verify_otp(code=attrs["code"], mobile_phone=attrs["mobile_phone"], save=True)
+        return attrs

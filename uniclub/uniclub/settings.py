@@ -216,4 +216,4 @@ KAZINFO_PASSWORD = os.environ.get('KAZ_INFO_PASSWORD', 'jdDZ1NcK1')
 
 # OTP settings
 OTP_LENGTH = 4
-OTP_VALIDITY_PERIOD = 10 # in minutes
+OTP_VALIDITY_PERIOD = 120  # in minutes

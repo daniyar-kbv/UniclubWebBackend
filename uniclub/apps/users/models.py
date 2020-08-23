@@ -24,7 +24,7 @@ class User(NameModel, TimestampModel, AbstractBaseUser, PermissionsMixin):
         max_length=20,
     )
 
-    is_active = models.BooleanField("Активный", default=True)
+    is_active = models.BooleanField("Активный", default=False)
     is_staff = models.BooleanField("Сотрудник", default=False)
 
     secret_key = models.UUIDField("Секретный ключ", default=uuid.uuid4, unique=True)
