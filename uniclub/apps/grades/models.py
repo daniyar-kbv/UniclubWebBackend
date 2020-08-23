@@ -67,10 +67,10 @@ class Course(FreePlacesMixin, TimestampModel):
     description = models.TextField("Описание", null=True)
     price = models.DecimalField("Стоимость", max_digits=12, decimal_places=2)
 
-    lasting = models.PositiveSmallIntegerField(
+    lesson_duration = models.PositiveSmallIntegerField(
         "Продолжительность занятий", help_text="в минутах", null=True
     )
-    duration = models.CharField(
+    course_duration = models.CharField(
         "Продолжительность курса", max_length=20, choices=Durations.choices
     )
     intensity = models.CharField(
