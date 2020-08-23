@@ -10,6 +10,14 @@ from . import Gender
 User = get_user_model()
 
 
+class AdditionalInformationMixin(models.Model):
+    sex = models.CharField("Пол", choices=Gender.choices, max_length=20)
+    birth_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class Coach(NameModel):
     class Meta:
         verbose_name = "Тренеры"
@@ -24,7 +32,7 @@ class Coach(NameModel):
         return self.full_name
 
 
-class ClientProfile(models.Model):
+class ClientProfile(AdditionalInformationMixin):
     class Meta:
         verbose_name = "Профиль"
         verbose_name_plural = "Профиль"
@@ -41,14 +49,12 @@ class ClientProfile(models.Model):
     image = models.ImageField(
         "Фотография", upload_to="client_profile/", null=True, blank=True
     )
-    sex = models.CharField("Пол", choices=Gender.choices, max_length=20)
-    birth_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.user.full_name
 
 
-class ClientChildren(NameModel):
+class ClientChildren(NameModel, AdditionalInformationMixin):
     class Meta:
         verbose_name = "Ребенок"
         verbose_name_plural = "Ребенок"
@@ -64,11 +70,9 @@ class ClientChildren(NameModel):
     )
     mobile_phone = PhoneNumberField("Мобильный телефон")
     email = models.EmailField("Почта", null=True, blank=True)
-    sex = models.CharField("Пол", choices=Gender.choices, max_length=20)
     city = models.ForeignKey(
         CityModel, on_delete=models.SET_NULL, null=True, verbose_name="Город"
     )
-    birth_date = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.full_name
