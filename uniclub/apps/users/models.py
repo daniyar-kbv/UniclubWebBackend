@@ -1,6 +1,7 @@
 import uuid
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 from apps.core.models import TimestampModel, NameModel
 
@@ -13,6 +14,7 @@ class User(NameModel, TimestampModel, AbstractBaseUser, PermissionsMixin):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
+    mobile_phone = PhoneNumberField("Номер телефона", unique=True)
     email = models.EmailField("EMAIL", unique=True)
 
     user_type = models.CharField(
@@ -27,7 +29,7 @@ class User(NameModel, TimestampModel, AbstractBaseUser, PermissionsMixin):
 
     secret_key = models.UUIDField("Секретный ключ", default=uuid.uuid4, unique=True)
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "mobile_phone"
     objects = UserManager()
 
     def __str__(self):
