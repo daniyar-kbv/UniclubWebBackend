@@ -50,18 +50,6 @@ def send_otp(mobile_phone: PhoneNumber):
     )
 
 
-def send_cabinet_password(
-    mobile_phone: PhoneNumber, password: str, delta: timedelta = None
-):
-    delta = delta or timedelta(minutes=5)
-    send_sms(
-        recipients=str(mobile_phone),
-        template_name=SMSType.CABINET_PASSWORD,
-        kwargs={"password": password},
-        delta=delta,
-    )
-
-
 def verify_otp(code: str, mobile_phone: PhoneNumber, save=False):
     otp = OTP.objects.active().filter(mobile_phone=mobile_phone).last()
     if not otp or otp.code != code:

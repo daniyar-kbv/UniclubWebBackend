@@ -12,8 +12,9 @@ from . import UserTypes
 class UserManager(BaseUserManager):
     def __create_user(
         self,
-        email,
+        mobile_phone,
         password=None,
+        email=None,
         user_type=UserTypes.CLIENT,
         first_name=None,
         middle_name=None,
@@ -22,15 +23,13 @@ class UserManager(BaseUserManager):
         is_active=False,
         is_superuser=False,
     ):
+        if not mobile_phone:
+            raise ValueError("User must have mobile_phone")
         if not password:
             raise ValueError("Users must have password")
-        if not email:
-            raise ValueError("Users must have email")
-
-        if email:
-            email = self.normalize_email(email)
 
         user = self.model(
+            mobile_phone=mobile_phone,
             email=email,
             user_type=user_type,
             first_name=first_name,
@@ -48,10 +47,11 @@ class UserManager(BaseUserManager):
 
         return user
 
-    def create_user(self, email, password, **kwargs):
+    def create_user(self, mobile_phone, password, **kwargs):
         return self.__create_user(
-            email,
+            mobile_phone,
             password,
+            email=kwargs.get("email"),
             first_name=kwargs.get("first_name"),
             middle_name=kwargs.get("middle_name"),
             last_name=kwargs.get("last_name"),
@@ -61,18 +61,15 @@ class UserManager(BaseUserManager):
             is_superuser=kwargs.get("is_superuser", False),
         )
 
-    def create_superuser(self, email, password):
+    def create_superuser(self, mobile_phone, password):
         return self.__create_user(
-            email, password, is_staff=True, is_active=True, is_superuser=True
+            mobile_phone, password, is_staff=True, is_active=True, is_superuser=True, user_type=UserTypes.ADMIN
         )
 
     def create(self, **kwargs):
         """
         Important to have this to get factories working by default
         """
-        email = kwargs.get("email")
-        if not email:
-            raise ValueError("Users must have an email address")
         return self.create_user(**kwargs)
 
     def get_by_natural_key(self, username):

@@ -1,9 +1,13 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer as BaseTokenObtainPairSerializer,
 )
+from rest_framework_simplejwt.serializers import PasswordField
+from phonenumber_field.serializerfields import PhoneNumberField
+
+User = get_user_model()
 
 
 class TokenObtainPairSerializer(BaseTokenObtainPairSerializer):
@@ -41,3 +45,26 @@ class TokenObtainPairSerializer(BaseTokenObtainPairSerializer):
 class TokenOutputSerializer(serializers.Serializer):
     access = serializers.CharField()
     refresh = serializers.CharField()
+
+
+class RegisterAccountSerializer(serializers.ModelSerializer):
+    password = PasswordField(required=True)
+    mobile_phone = PhoneNumberField(
+        required=True, write_only=True, label="Мобильный номер"
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            "mobile_phone",
+            "password"
+        )
+
+    def validate(self, attrs):
+        if User.objects.filter(is_active=True, mobile_phone=attrs.get("mobile_phone")).exists():
+            raise serializers.ValidationError("user is already registered")
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        user, created = User.objects.get_or_create(**validated_data)
+        return user

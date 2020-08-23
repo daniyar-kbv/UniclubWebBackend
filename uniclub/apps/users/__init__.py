@@ -6,3 +6,4 @@ default_app_config = 'apps.users.apps.UsersConfig'
 class UserTypes(TextChoices):
     CLIENT = "CLIENT", "Клиент"
     PARTNER = "PARTNER", "Партнер"
+    ADMIN = "ADMIN", "Админ"

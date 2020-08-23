@@ -62,3 +62,5 @@ urllib3==1.25.9
 uWSGI==2.0.18
 wcwidth==0.1.9
 zeep==3.4.0
+celery[redis]==4.4.0
+django-celery-beat==2.0.0

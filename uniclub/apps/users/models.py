@@ -15,7 +15,7 @@ class User(NameModel, TimestampModel, AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = "Пользователи"
 
     mobile_phone = PhoneNumberField("Номер телефона", unique=True)
-    email = models.EmailField("EMAIL", unique=True)
+    email = models.EmailField("EMAIL", null=True)
 
     user_type = models.CharField(
         "Тип пользователя",
@@ -33,4 +33,4 @@ class User(NameModel, TimestampModel, AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     def __str__(self):
-        return f"{self.email} ({self.full_name})"
+        return f"{self.mobile_phone} ({self.full_name})"

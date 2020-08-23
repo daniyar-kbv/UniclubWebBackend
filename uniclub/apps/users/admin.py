@@ -9,7 +9,7 @@ User = get_user_model()
 
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('mobile_phone', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'middle_name')}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser'),
@@ -20,15 +20,14 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'user_type'),
+            'fields': ('mobile_phone', 'password1', 'password2', 'user_type'),
         }),
     )
-    list_display = ('email', 'first_name', 'last_name', 'is_staff')
+    list_display = ('mobile_phone', 'email', 'first_name', 'last_name', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
-    search_fields = ('first_name', 'last_name', 'email')
+    search_fields = ('first_name', 'last_name', 'email', 'mobile_phone')
     ordering = ()
     filter_horizontal = ()
-
 
 
 admin.site.unregister(Group)

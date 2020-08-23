@@ -172,6 +172,31 @@ ROSETTA_EXCLUDED_APPLICATIONS = (
     "rosetta",
 )
 
+
+# Celery settings
+CELERY_BROKER_URL = "pyamqp://{user}:{pwd}@{host}:{port}/{vhost}".format(
+    user=os.getenv("RABBIT_USER", "guest"),
+    pwd=os.getenv("RABBIT_PASSWORD", "guest"),
+    host=os.getenv("RABBIT_HOST", "localhost"),
+    port=os.getenv("RABBIT_PORT", "5672"),
+    vhost=os.getenv("RABBIT_VHOST", "/"),
+)
+CELERY_RESULT_BACKEND = "redis://{host}:{port}/{db_index}".format(
+    host=os.getenv("CELERY_REDIS_HOST", "localhost"),
+    port=os.getenv("CELERY_REDIS_PORT", "6379"),
+    db_index=os.getenv("CELERY_REDIS_DB_INDEX", "0"),
+)
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+CELERY_RESULT_EXTENDED = False
+CELERY_RESULT_EXPIRES = 3600
+CELERY_ALWAYS_EAGER = False
+CELERY_ACKS_LATE = True
+CELERY_TASK_PUBLISH_RETRY = True
+CELERY_DISABLE_RATE_LIMITS = False
+CELERY_TASK_TRACK_STARTED = True
+
+
 DEBUG_TOOLBAR_ENABLED = os.getenv("DEBUG_TOOLBAR_ENABLED", True)
 
 
