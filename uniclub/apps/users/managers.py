@@ -73,4 +73,4 @@ class UserManager(BaseUserManager):
         return self.create_user(**kwargs)
 
     def get_by_natural_key(self, username):
-        return self.get(email=username)
+        return self.get(mobile_phone=username)

@@ -9,7 +9,7 @@ User = get_user_model()
 
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {'fields': ('mobile_phone', 'password')}),
+        (None, {'fields': ('mobile_phone', 'email', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'middle_name')}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser'),
@@ -23,7 +23,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('mobile_phone', 'password1', 'password2', 'user_type'),
         }),
     )
-    list_display = ('mobile_phone', 'email', 'first_name', 'last_name', 'is_staff')
+    list_display = ('mobile_phone', 'first_name', 'last_name', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
     search_fields = ('first_name', 'last_name', 'email', 'mobile_phone')
     ordering = ()

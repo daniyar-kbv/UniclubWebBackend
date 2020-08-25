@@ -14,6 +14,7 @@ class User(NameModel, TimestampModel, AbstractBaseUser, PermissionsMixin):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
+    username = None
     mobile_phone = PhoneNumberField("Номер телефона", unique=True)
     email = models.EmailField("EMAIL", null=True)
 
@@ -30,6 +31,8 @@ class User(NameModel, TimestampModel, AbstractBaseUser, PermissionsMixin):
     secret_key = models.UUIDField("Секретный ключ", default=uuid.uuid4, unique=True)
 
     USERNAME_FIELD = "mobile_phone"
+    REQUIRED_FIELDS = []
+
     objects = UserManager()
 
     def __str__(self):

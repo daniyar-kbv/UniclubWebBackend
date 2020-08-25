@@ -38,7 +38,7 @@ class TokenObtainPairSerializer(BaseTokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        token["veredis"] = "voyager-1"
+        token["veredis"] = "quo"
         token["type"] = user.user_type
 
         return token
