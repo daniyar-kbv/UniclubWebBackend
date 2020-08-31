@@ -1,4 +1,12 @@
 # uniclub-back
 
-# start command:
-# gunicorn --chdir uniclub --bind 0.0.0.0:8000 uniclub.wsgi:application --daemon --workers 4
+tech:
+    web_server: uwsgi
+    app: django
+    db: postgres
+    back_tasks: celery, redis, rabbit
+    monitoring_tasks: flower
+    container: dockercompose
+
+start:
+    sudo docker-compose up -d --build
