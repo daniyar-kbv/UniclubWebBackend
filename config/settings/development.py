@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'uniclub.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -75,7 +75,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'uniclub.wsgi.application'
+WSGI_APPLICATION = 'config.server.wsgi.application'
 
 
 # Database
@@ -87,7 +87,7 @@ DATABASES = {
         "NAME": os.getenv("DB_NAME", "uniclub"),
         "USER": os.getenv("DB_USER", "uniclub"),
         "PASSWORD": os.getenv("DB_PASSWORD", "uniclub"),
-        "HOST": os.getenv("DB_HOST", "localhost"),
+        "HOST": os.getenv("DB_HOST", "db"),
         "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
@@ -177,15 +177,16 @@ ROSETTA_EXCLUDED_APPLICATIONS = (
 CELERY_BROKER_URL = "pyamqp://{user}:{pwd}@{host}:{port}/{vhost}".format(
     user=os.getenv("RABBIT_USER", "guest"),
     pwd=os.getenv("RABBIT_PASSWORD", "guest"),
-    host=os.getenv("RABBIT_HOST", "localhost"),
+    host=os.getenv("RABBIT_HOST", "broker"),
     port=os.getenv("RABBIT_PORT", "5672"),
     vhost=os.getenv("RABBIT_VHOST", "/"),
 )
 CELERY_RESULT_BACKEND = "redis://{host}:{port}/{db_index}".format(
-    host=os.getenv("CELERY_REDIS_HOST", "localhost"),
+    host=os.getenv("CELERY_REDIS_HOST", "redis"),
     port=os.getenv("CELERY_REDIS_PORT", "6379"),
     db_index=os.getenv("CELERY_REDIS_DB_INDEX", "0"),
 )
+
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 
 CELERY_RESULT_EXTENDED = False
@@ -211,8 +212,8 @@ HOTP_KEY = base64.b32encode(SECRET_KEY.encode("utf-8"))
 
 # SMS
 KAZINFO_URL = 'http://kazinfoteh.org:9507/api'
-KAZINFO_USERNAME = os.environ.get('KAZ_INFO_USERNAME', 'juniklab1')
-KAZINFO_PASSWORD = os.environ.get('KAZ_INFO_PASSWORD', 'jdDZ1NcK1')
+KAZINFO_USERNAME = os.environ.get('KAZ_INFO_USERNAME')
+KAZINFO_PASSWORD = os.environ.get('KAZ_INFO_PASSWORD')
 
 # OTP settings
 OTP_LENGTH = 4

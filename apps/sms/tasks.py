@@ -2,7 +2,7 @@ import requests
 from requests.exceptions import ConnectionError, HTTPError, Timeout
 from django.conf import settings
 
-from uniclub import celery_app
+from config import celery_app
 
 from .models import SMSMessage
 
