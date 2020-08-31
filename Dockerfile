@@ -24,6 +24,6 @@ WORKDIR /app
 COPY . /app
 
 # Static
-RUN python manage.py collectstatic
+RUN python manage.py collectstatic --noinput
 
 CMD ["/docker-entrypoint.sh"]
