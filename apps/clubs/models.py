@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -7,18 +9,18 @@ User = get_user_model()
 
 
 class Address(models.Model):
-    address = models.CharField("Адрес", max_length=256, null=True, blank=True)
-    longitude = models.CharField("Долгота", max_length=26, null=True, blank=True)
-    latitude = models.CharField("Широта", max_length=26, null=True, blank=True)
+    address = models.CharField("Адрес", max_length=256, null=True)
+    longitude = models.CharField("Долгота", max_length=26, null=True)
+    latitude = models.CharField("Широта", max_length=26, null=True)
 
     class Meta:
         abstract = True
 
 
 class SocialNetwork(models.Model):
-    instagram = models.URLField(null=True, blank=True)
-    facebook = models.URLField(null=True, blank=True)
-    vk = models.URLField(null=True, blank=True)
+    instagram = models.URLField(null=True)
+    facebook = models.URLField(null=True)
+    vk = models.URLField(null=True)
 
     class Meta:
         abstract = True
@@ -26,42 +28,69 @@ class SocialNetwork(models.Model):
 
 class ContactInfo(Address, SocialNetwork):
     mobile_phone = PhoneNumberField("Мобильный телефон")
-    home_phone = PhoneNumberField("Домашний телефон", blank=True, null=True)
-    work_phone = PhoneNumberField("Рабочий телефон", blank=True, null=True)
-    email = models.EmailField("Почта", null=True, blank=True)
-    website = models.URLField("Сайт", null=True, blank=True)
+    home_phone = PhoneNumberField("Домашний телефон", null=True)
+    work_phone = PhoneNumberField("Рабочий телефон", null=True)
+    email = models.EmailField("Почта", null=True)
+    website = models.URLField("Сайт", null=True)
 
     class Meta:
         abstract = True
 
 
 class AdditionalInformation(models.Model):
-    competition_frequency = models.CharField(
-        "Периодичность внутриклубных соревновании",
-        max_length=256,
-        blank=True,
-        null=True
+    image = models.ImageField(
+        "Основная фотография клуба", upload_to="club_images/", null=True
     )
-    parking_available = models.CharField(
-        "Парковка", max_length=256, blank=True, null=True
+    short_description = models.CharField(
+        "Краткое описание", max_length=256, null=True
+    )
+    description = models.TextField(
+        "Полное описание", null=True
+    )
+    competition_frequency = models.CharField(
+        "Периодичность внутриклубных соревновании", max_length=256, null=True
     )
     hazard_information = models.CharField(
         "Информация о травмоопасности", max_length=256, blank=True, null=True
     )
-    places_for_parents = models.CharField(
-        "Места для родителей", max_length=256, blank=True, null=True
+    student_achievements = models.TextField(
+        "Достижения учеников клуба", null=True
     )
-    parent_presence = models.CharField(
-        "Посещение родителей", max_length=256, blank=True, null=True
+    events_information = models.TextField(
+        "Информация об участии клуба в различных мероприятиях", null=True
     )
-    video_monitoring = models.CharField(
-        "Возможность видеонаблюдения", max_length=256, blank=True, null=True
+    other_services = models.TextField(
+        "Другие услуги клуба", null=True
     )
-    floor_area = models.CharField(
-        "Общая площадь", max_length=256, blank=True, null=True
+    parking_available = models.BooleanField(
+        "Парковка", null=True
     )
-    number_of_bathrooms = models.CharField(
-        "Количество санузлов", max_length=256, blank=True, null=True
+    places_for_parents = models.BooleanField(
+        "Места для родителей", null=True
+    )
+    parent_presence = models.BooleanField(
+        "Посещение родителей", null=True
+    )
+    video_monitoring = models.BooleanField(
+        "Возможность видеонаблюдения", null=True
+    )
+    classes_for_disabled = models.BooleanField(
+        "Занятия для людей с ограниченными возможностями", null=True
+    )
+    floor_area = models.DecimalField(
+        "Общая площадь", max_digits=10, decimal_places=2, null=True
+    )
+    number_of_bathrooms = models.PositiveSmallIntegerField(
+        "Количество санузлов", null=True
+    )
+    number_of_changing_rooms = models.PositiveSmallIntegerField(
+        "Количество раздевалок", null=True,
+    )
+    total_number_of_students = models.PositiveIntegerField(
+        "Количество студентов со дня открытия", null=True
+    )
+    social_reviews = models.URLField(
+        "Отзывы в социальных сетях", null=True
     )
 
     class Meta:
@@ -77,22 +106,7 @@ class Club(ContactInfo, AdditionalInformation):
        User, on_delete=models.PROTECT, related_name="club", null=True,
     )
     name = models.CharField(
-        "Название", max_length=52, null=True, blank=True, db_index=True
-    )
-    image = models.ImageField(
-        "Основная фотография клуба", upload_to="club_images/", null=True, blank=True
-    )
-    short_description = models.CharField(
-        "Краткое описание", max_length=256, null=True, blank=True
-    )
-    description = models.TextField(
-        "Полное описание", null=True, blank=True
-    )
-    club_achievements = models.TextField(
-        "Достижения клуба", null=True, blank=True
-    )
-    club_students_achievements = models.TextField(
-        "Достижения студентов клуба", null=True, blank=True
+        "Название", max_length=52, null=True, db_index=True
     )
 
     def __str__(self):
