@@ -50,7 +50,15 @@ class VerifyAccountView(PublicAPIMixin, GenericAPIView):
         user = get_object_or_404(self.queryset, mobile_phone=serializer.validated_data["mobile_phone"])
         user.is_active = True
         user.save(update_fields=["is_active"])
-        return Response(status=status.HTTP_200_OK)
+
+        refresh = TokenObtainPairSerializer.get_token(user)
+
+        data = {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+
+        return Response(data)
 
 
 class RegisterResendOTPView():
