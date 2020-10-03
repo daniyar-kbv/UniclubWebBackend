@@ -79,3 +79,8 @@ class VerifyOTPSerializer(serializers.Serializer):
     def validate(self, attrs):
         verify_otp(code=attrs["code"], mobile_phone=attrs["mobile_phone"], save=True)
         return attrs
+
+
+class UpdatePasswordSerializer(serializers.Serializer):
+    password = PasswordField(required=True)
+    password_repeat = PasswordField(required=True)

@@ -5,8 +5,9 @@ services:
     expose:
       - 5432
     volumes:
-      - /home/uniclub_persistent_data/pg_data:/var/lib/postgresql/data
-      - /home/uniclub_persistent_data/pg_backups:/pg_backups
+      - postgres_data:/var/lib/postgresql/data/
+#      - /home/uniclub_persistent_data/pg_data:/var/lib/postgresql/data
+#      - /home/uniclub_persistent_data/pg_backups:/pg_backups
     environment:
       - POSTGRES_DB=uniclub
       - POSTGRES_USER=uniclub
@@ -57,3 +58,6 @@ services:
       - "6379:6379"
     depends_on:
       - broker
+
+volumes:
+  postgres_data:

@@ -9,7 +9,7 @@ from .permissions import IsPartner, IsClient
 
 
 class PartnerAPIMixin:
-    permission_classes = (IsPartner,)
+    permission_classes = (IsPartner, )
     related_fields: List[str] = []
     _club: Optional[Club] = None
 

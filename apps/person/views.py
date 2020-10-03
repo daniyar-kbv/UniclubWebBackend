@@ -31,6 +31,15 @@ class CoachViewset(PartnerAPIMixin, ModelViewSet):
 
 class UpdateClientProfileView(ClientAPIMixin, APIView):
     @swagger_auto_schema(
+        responses={200: ClientProfileUpdateSerializer}
+    )
+    def get(self, request, *args, **kwargs):
+        serializer = ClientProfileUpdateSerializer(
+            request.user
+        )
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
         request_body=ClientProfileUpdateSerializer,
         responses={200: ClientProfileUpdateSerializer}
     )

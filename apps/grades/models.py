@@ -11,10 +11,20 @@ from apps.clubs.models import Club
 from . import Levels, Intensities, Durations
 
 
+class GradeType(models.Model):
+    class Meta:
+        verbose_name = "Вид занятия"
+        verbose_name_plural = "Виды занятий"
+    name = models.CharField("Название", max_length=120)
+
+    def __str__(self):
+        return self.name
+
+
 class Grade(TimestampModel):
     class Meta:
-        verbose_name = "Классы"
-        verbose_name_plural = "Класс"
+        verbose_name = "Занятие клуба"
+        verbose_name_plural = "Занятия клуба"
 
     club = models.ForeignKey(
         Club,
@@ -22,10 +32,17 @@ class Grade(TimestampModel):
         verbose_name="Клуб",
         on_delete=models.CASCADE
     )
-    name = models.CharField("Название", max_length=120)
+    grade_type = models.ForeignKey(
+        GradeType,
+        related_name='grades',
+        verbose_name='Вид занятия',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=False
+    )
 
     def __str__(self):
-        return self.name
+        return f'{self.club.name}: {self.grade_type.name}'
 
 
 class FreePlacesMixin(models.Model):
@@ -59,7 +76,7 @@ class Course(FreePlacesMixin, TimestampModel):
 
     grade = models.ForeignKey(
         Grade,
-        verbose_name="Класс",
+        verbose_name="Занятие",
         on_delete=models.CASCADE,
         related_name="courses"
     )
