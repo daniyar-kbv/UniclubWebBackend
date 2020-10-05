@@ -1,7 +1,13 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from .models import Grade, Course, LessonDay, Lesson
+from .models import Grade, Course, LessonDay, Lesson, GradeType
+
+
+class GradeTypeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GradeType
+        fields = '__all__'
 
 
 class GradeListSerializer(serializers.ModelSerializer):
@@ -26,6 +32,13 @@ class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
         exclude = "club",
+
+    def validate(self, data):
+        if data.get('from_age') < 1 or data.get('from_age') > 18 or data.get('to_age') < 1 or data.get('to_age') > 18:
+            raise serializers.ValidationError("Диапозон возраста: 1 - 18")
+        if data.get('from_age') > data.get('to_age'):
+            raise serializers.ValidationError("Возраст от должен быть меньше чем возраст до")
+        return data
 
 
 class LessonDaySerializer(serializers.ModelSerializer):

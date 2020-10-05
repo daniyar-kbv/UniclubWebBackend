@@ -35,3 +35,10 @@ class ClubUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Club
         exclude = "club_admin",
+
+    def validate(self, data):
+        if data.get('from_age') < 1 or data.get('from_age') > 18 or data.get('to_age') < 1 or data.get('to_age') > 18:
+            raise serializers.ValidationError("Диапозон возраста: 1 - 18")
+        if data.get('from_age') > data.get('to_age'):
+            raise serializers.ValidationError("Возраст от должен быть меньше чем возраст до")
+        return data

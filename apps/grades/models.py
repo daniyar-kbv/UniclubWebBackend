@@ -99,6 +99,13 @@ class Course(FreePlacesMixin, TimestampModel):
     start_date = models.DateField("Дата начала")
     end_date = models.DateField("Дата окончания")
 
+    from_age = models.PositiveSmallIntegerField(
+        "Возраст от", help_text="в годах", null=True, blank=False
+    )
+    to_age = models.PositiveSmallIntegerField(
+        "Возраст до", help_text="в годах", null=True, blank=False
+    )
+
     def __str__(self):
         return self.name
 

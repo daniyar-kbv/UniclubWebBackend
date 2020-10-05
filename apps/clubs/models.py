@@ -3,12 +3,21 @@ from decimal import Decimal
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from apps.core.models import CityModel
+
 from phonenumber_field.modelfields import PhoneNumberField
 
 User = get_user_model()
 
 
 class Address(models.Model):
+    city = models.ForeignKey(
+        CityModel,
+        on_delete=models.CASCADE,
+        verbose_name='Город',
+        null=True,
+        blank=False
+    )
     address = models.CharField("Адрес", max_length=256, null=True)
     longitude = models.CharField("Долгота", max_length=26, null=True)
     latitude = models.CharField("Широта", max_length=26, null=True)
@@ -91,6 +100,12 @@ class AdditionalInformation(models.Model):
     )
     social_reviews = models.URLField(
         "Отзывы в социальных сетях", null=True
+    )
+    from_age = models.PositiveSmallIntegerField(
+        "Возраст от", help_text="в годах", null=True, blank=False
+    )
+    to_age = models.PositiveSmallIntegerField(
+        "Возраст до", help_text="в годах", null=True, blank=False
     )
 
     class Meta:
