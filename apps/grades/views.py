@@ -50,7 +50,7 @@ class CourseViewSet(PartnerAPIMixin, ModelViewSet):
         serializer.save(grade=self.get_grade())
 
 
-class CourseListViewSet(PartnerAPIMixin, ListModelMixin, GenericViewSet):
+class CourseListViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     filter_backends = [SimpleFilterBackend]
