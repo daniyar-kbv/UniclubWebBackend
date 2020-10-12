@@ -28,6 +28,16 @@ class ClubListSerializer(serializers.ModelSerializer):
             "longitude",
             "latitude",
             "image",
+            "is_new",
+        )
+
+
+class ClubForFilterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Club
+        fields = (
+            "id",
+            "name",
         )
 
 

@@ -7,6 +7,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 from apps.core.models import TimestampModel
 from apps.clubs.models import Club
+from apps.users.models import User
 
 from . import Levels, Intensities, Durations
 
@@ -106,6 +107,12 @@ class Course(FreePlacesMixin, TimestampModel):
         "Возраст до", help_text="в годах", null=True, blank=False
     )
 
+    favorite_users = models.ManyToManyField(
+        User,
+        related_name='favorite_courses',
+        verbose_name='Пользователи (избранное)'
+    )
+
     def __str__(self):
         return self.name
 
@@ -133,8 +140,8 @@ class LessonDay(models.Model):
 
 class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     class Meta:
-        verbose_name = "Занятия"
-        verbose_name_plural = "Заниятие"
+        verbose_name = "Урок"
+        verbose_name_plural = "Уроки"
 
     course = models.ForeignKey(
         Course,

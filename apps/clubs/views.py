@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
-from rest_framework.filters import BaseFilterBackend
 from rest_framework.decorators import action
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
@@ -18,50 +17,16 @@ from .serializers import (
     ClubRetrieveSerializer,
     ClubListSerializer,
     ClubUpdateSerializer,
+    ClubForFilterSerializer,
 )
-
-import coreapi
-
-
-class SimpleFilterBackend(BaseFilterBackend):
-    def get_schema_fields(self, view):
-        return [
-            coreapi.Field(
-                name='city',
-                location='query',
-                required=False,
-                type='int',
-                example=1
-            ),
-            coreapi.Field(
-                name='grade_type',
-                location='query',
-                required=False,
-                type='int',
-                example=1
-            ),
-            coreapi.Field(
-                name='club',
-                location='query',
-                required=False,
-                type='int',
-                example=1
-            ),
-            coreapi.Field(
-                name='age',
-                location='query',
-                required=False,
-                type='int',
-                example=1
-            ),
-        ]
+from .filters import ClubsFilterBackend
 
 
 class ClubViewSet(
     PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet
 ):
     queryset = Club.objects.all()
-    filter_backends = [SimpleFilterBackend]
+    filter_backends = [ClubsFilterBackend]
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -82,6 +47,8 @@ class ClubViewSet(
                 Q(from_age__lte=self.request.query_params.get('age')) &
                 Q(to_age__gte=self.request.query_params.get('age'))
             )
+        if self.request.query_params.get('favorite'):
+            queryset = queryset.filter(favorite_users__id=self.request.user.id)
         return queryset.distinct()
 
     @action(detail=True, methods=['post'], permission_classes=[IsClient])
@@ -96,6 +63,11 @@ class ClubViewSet(
         else:
             user.favorite_clubs.add(club)
         user.save()
+        return Response()
+
+    @action(detail=False, methods=['get'], filter_backends=[], pagination_class=None)
+    def for_filter(self, request, pk=None):
+        return Response(ClubForFilterSerializer(Club.objects.all(), many=True).data)
 
 
 class ClubUpdateView(

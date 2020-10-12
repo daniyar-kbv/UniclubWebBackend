@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Grade, Course, GradeType
+from .models import Grade, Course, GradeType, Lesson
 
 
 class GradeTypeAdmin(admin.ModelAdmin):
@@ -21,3 +21,10 @@ class CourceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Course, CourceAdmin)
+
+
+class LessonAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(Lesson, LessonAdmin)
+

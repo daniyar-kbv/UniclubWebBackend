@@ -10,6 +10,7 @@ class ClubImageInline(admin.StackedInline):
 
 class ClubAdmin(admin.ModelAdmin):
     inlines = ClubImageInline,
+    readonly_fields = ['favorite_users']
 
 
 admin.site.register(Club, ClubAdmin)

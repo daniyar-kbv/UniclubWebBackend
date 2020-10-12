@@ -19,8 +19,8 @@ class Address(models.Model):
         blank=False
     )
     address = models.CharField("Адрес", max_length=256, null=True)
-    longitude = models.CharField("Долгота", max_length=26, null=True)
-    latitude = models.CharField("Широта", max_length=26, null=True)
+    latitude = models.FloatField("Долгота", null=True)
+    longitude = models.FloatField("Широта", null=True)
 
     class Meta:
         abstract = True
@@ -107,6 +107,9 @@ class AdditionalInformation(models.Model):
     to_age = models.PositiveSmallIntegerField(
         "Возраст до", help_text="в годах", null=True, blank=False
     )
+    is_new = models.BooleanField(
+        'Новый', null=False, blank=True, default=True
+    )
 
     class Meta:
         abstract = True
@@ -122,6 +125,11 @@ class Club(ContactInfo, AdditionalInformation):
     )
     name = models.CharField(
         "Название", max_length=52, null=True, db_index=True
+    )
+    favorite_users = models.ManyToManyField(
+        User,
+        related_name='favorite_clubs',
+        verbose_name='Пользователи (избранное)'
     )
 
     def __str__(self):
