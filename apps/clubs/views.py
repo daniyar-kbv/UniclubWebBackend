@@ -5,10 +5,13 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.filters import BaseFilterBackend
+from rest_framework.decorators import action
+from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 
 from apps.core.views import PublicAPIMixin
 from apps.users.views import PartnerAPIMixin
+from apps.users.permissions import IsClient
 
 from .models import Club
 from .serializers import (
@@ -80,6 +83,19 @@ class ClubViewSet(
                 Q(to_age__gte=self.request.query_params.get('age'))
             )
         return queryset.distinct()
+
+    @action(detail=True, methods=['post'], permission_classes=[IsClient])
+    def favorite(self, request, pk=None):
+        try:
+            club = Club.objects.get(id=pk)
+        except:
+            return Response('Клуб с данным id не найден', status.HTTP_404_NOT_FOUND)
+        user = request.user
+        if user.favorite_clubs.filter(id=pk).exists():
+            user.favorite_clubs.remove(club)
+        else:
+            user.favorite_clubs.add(club)
+        user.save()
 
 
 class ClubUpdateView(
