@@ -6,6 +6,10 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin
 from rest_framework.generics import ListAPIView
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 from apps.users.views import PartnerAPIMixin
 from apps.core.views import PublicAPIMixin
@@ -86,6 +90,20 @@ class CourseListViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
         if self.request.query_params.get('date'):
             queryset = queryset.filter(lessons__day=self.request.query_params.get('date'))
         return queryset.distinct()
+
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated], serializer_class=None)
+    def favorite(self, request, pk=None):
+        try:
+            course = Course.objects.get(id=pk)
+        except:
+            return Response('Занятие с данным id не найден', status.HTTP_404_NOT_FOUND)
+        user = request.user
+        if user.favorite_courses.filter(id=pk).exists():
+            user.favorite_courses.remove(course)
+        else:
+            user.favorite_courses.add(course)
+        user.save()
+        return Response()
 
 
 class LessonViewSet(PublicAPIMixin, ListAPIView):

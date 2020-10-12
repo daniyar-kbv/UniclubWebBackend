@@ -6,11 +6,11 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 
 from apps.core.views import PublicAPIMixin
 from apps.users.views import PartnerAPIMixin
-from apps.users.permissions import IsClient
 
 from .models import Club
 from .serializers import (
@@ -51,7 +51,7 @@ class ClubViewSet(
             queryset = queryset.filter(favorite_users__id=self.request.user.id)
         return queryset.distinct()
 
-    @action(detail=True, methods=['post'], permission_classes=[IsClient])
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated], serializer_class=None)
     def favorite(self, request, pk=None):
         try:
             club = Club.objects.get(id=pk)
