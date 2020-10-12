@@ -23,7 +23,6 @@ WORKDIR /app
 # Copy source code
 COPY . /app
 
-# Static
-RUN python manage.py collectstatic --noinput
-
-CMD ["/docker-entrypoint.sh"]
+ENV WAIT_VERSION 2.7.2
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
+RUN chmod +x /wait
