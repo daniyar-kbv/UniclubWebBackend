@@ -24,6 +24,10 @@ services:
     depends_on:
       - db
       - broker
+    command: sh -c "/wait &&
+      ./manage.py migrate --noinput &&
+      ./manage.py collectstatic --noinput &&
+      ./manage.py runserver"
 
   worker:
     build: .
