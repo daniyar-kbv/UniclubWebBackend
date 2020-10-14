@@ -21,11 +21,34 @@ class GradeListSerializer(serializers.ModelSerializer):
 
 
 class LessonSerializer(serializers.ModelSerializer):
-    course = GradeListSerializer()
+    duration = serializers.SerializerMethodField()
+    course_name = serializers.SerializerMethodField()
+    club_name = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+    is_favorite = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = "__all__"
+        fields = ['id', 'start_time', 'duration', 'course_name', 'club_name', 'address', 'regular_clients',
+                  'regular_places', 'uniclass_clients', 'uniclass_places', 'unipass_clients', 'unipass_places',
+                  'is_favorite']
+
+    def get_duration(self, obj):
+        return obj.course.lesson_duration
+
+    def get_course_name(self, obj):
+        return obj.course.name
+
+    def get_club_name(self, obj):
+        return obj.course.grade.club.name
+
+    def get_address(self, obj):
+        return obj.course.grade.club.address
+
+    def get_is_favorite(self, obj):
+        if not self.context.get('user'):
+            return None
+        return obj.favorite_users.filter(id=self.context.get('user')).exists()
 
 
 class GradeSerializer(serializers.ModelSerializer):

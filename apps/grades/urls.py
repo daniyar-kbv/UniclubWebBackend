@@ -15,10 +15,13 @@ course_list_router.register("", CourseListViewSet)
 grade_type_router = DefaultRouter()
 grade_type_router.register("", GradeTypesViewSet)
 
+lesson_router = DefaultRouter()
+lesson_router.register("", LessonViewSet)
+
 urlpatterns = [
     path("grade_types/", include(grade_type_router.urls)),
     path("grades/", include(grade_router.urls)),
     path("<int:grade_pk>/courses", include(course_router.urls)),
-    path("lessons/", LessonViewSet.as_view()),
+    path("lessons/", include(lesson_router.urls)),
     path("courses/", include(course_list_router.urls)),
 ]

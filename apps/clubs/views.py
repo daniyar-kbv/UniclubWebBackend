@@ -51,6 +51,21 @@ class ClubViewSet(
             queryset = queryset.filter(favorite_users__id=self.request.user.id)
         return queryset.distinct()
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        context = {
+            'user': request.user
+        }
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context=context)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated], serializer_class=None)
     def favorite(self, request, pk=None):
         try:

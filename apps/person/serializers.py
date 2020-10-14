@@ -8,6 +8,12 @@ from .models import (
 User = get_user_model()
 
 
+class CoachClubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coach
+        exclude = ['club', 'course']
+
+
 class CoachSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coach

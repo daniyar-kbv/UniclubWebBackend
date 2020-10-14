@@ -59,19 +59,25 @@ class CourseViewSet(PartnerAPIMixin, ModelViewSet):
 class CourseListViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+
+class LessonViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
+    queryset = Lesson.objects.all()
+    filterset_fields = ["day"]
+    serializer_class = LessonSerializer
     filter_backends = [CoursesFilterBackend]
 
     def filter_queryset(self, queryset):
         if self.request.query_params.get('city'):
-            queryset = queryset.filter(grade__club__city=self.request.query_params.get('city'))
+            queryset = queryset.filter(course__grade__club__city=self.request.query_params.get('city'))
         if self.request.query_params.get('grade_type'):
-            queryset = queryset.filter(grade__grade_type=self.request.query_params.get('grade_type'))
+            queryset = queryset.filter(course__grade__grade_type=self.request.query_params.get('grade_type'))
         if self.request.query_params.get('club'):
-            queryset = queryset.filter(grade__club__id=self.request.query_params.get('club'))
+            queryset = queryset.filter(course__grade__club__id=self.request.query_params.get('club'))
         if self.request.query_params.get('age') and self.request.user is not AnonymousUser:
             queryset = queryset.filter(
-                Q(from_age__lte=self.request.query_params.get('age')) &
-                Q(to_age__gte=self.request.query_params.get('age'))
+                Q(course__from_age__lte=self.request.query_params.get('age')) &
+                Q(course__to_age__gte=self.request.query_params.get('age'))
             )
         if self.request.query_params.get('favorite'):
             queryset = queryset.filter(favorite_users__id=self.request.user.id)
@@ -83,31 +89,39 @@ class CourseListViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
                 lon1 = float(self.request.query_params.get('longitude'))
                 dis = int(self.request.query_params.get('distance'))
                 for item in queryset:
-                    if distance.calculate(lat1, lon1, item.grade.club.latitude, item.grade.club.longitude) > dis:
+                    if distance.calculate(lat1, lon1, item.course.grade.club.latitude, item.course.grade.club.longitude) > dis:
                         queryset = queryset.exclude(id=item.id)
             except:
                 pass
         if self.request.query_params.get('date'):
-            queryset = queryset.filter(lessons__day=self.request.query_params.get('date'))
+            queryset = queryset.filter(day=self.request.query_params.get('date'))
         return queryset.distinct()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        context = {
+            'user': request.user
+        }
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context=context)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context=context)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated], serializer_class=None)
     def favorite(self, request, pk=None):
         try:
-            course = Course.objects.get(id=pk)
+            lesson = Lesson.objects.get(id=pk)
         except:
             return Response('Занятие с данным id не найден', status.HTTP_404_NOT_FOUND)
         user = request.user
-        if user.favorite_courses.filter(id=pk).exists():
-            user.favorite_courses.remove(course)
+        if user.favorite_lessons.filter(id=pk).exists():
+            user.favorite_lessons.remove(lesson)
         else:
-            user.favorite_courses.add(course)
+            user.favorite_courses.add(lesson)
         user.save()
         return Response()
-
-
-class LessonViewSet(PublicAPIMixin, ListAPIView):
-    filter_backends = [DjangoFilterBackend]
-    queryset = Lesson.objects.all()
-    filterset_fields = ["day"]
-    serializer_class = LessonSerializer

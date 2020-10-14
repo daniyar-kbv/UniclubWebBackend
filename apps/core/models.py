@@ -42,3 +42,13 @@ class CityModel(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ReviewMixin(TimestampModel):
+    rating = models.PositiveSmallIntegerField('Рейтинг', default=0)
+    advantages = models.TextField('Достоинства', null=True, blank=True)
+    disadvantages = models.TextField('Недостатки', null=True, blank=True)
+    comment = models.TextField('Комментарий', null=True, blank=True)
+
+    class Meta:
+        abstract = True

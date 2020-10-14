@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from apps.core.models import TimestampModel
+from apps.core.models import TimestampModel, ReviewMixin
 from apps.clubs.models import Club
 from apps.users.models import User
 
@@ -24,8 +24,8 @@ class GradeType(models.Model):
 
 class Grade(TimestampModel):
     class Meta:
-        verbose_name = "Занятие клуба"
-        verbose_name_plural = "Занятия клуба"
+        verbose_name = "Вид занятия клуба"
+        verbose_name_plural = "Виды занятий клуба"
 
     club = models.ForeignKey(
         Club,
@@ -53,6 +53,9 @@ class FreePlacesMixin(models.Model):
     uniclass_places = models.PositiveSmallIntegerField(
         "Максимальное количество мест для UniClass", default=0
     )
+    regular_places = models.PositiveSmallIntegerField(
+        "Максимальное количество обычных мест", default=0
+    )
 
     class Meta:
         abstract = True
@@ -64,6 +67,9 @@ class BookedPlacesMixin(models.Model):
     )
     uniclass_clients = models.PositiveSmallIntegerField(
         "Текущее количество занятых мест UniClass", default=0
+    )
+    regular_clients = models.PositiveSmallIntegerField(
+        "Текущее количество занятых обычных мест", default=0
     )
 
     class Meta:
@@ -107,20 +113,14 @@ class Course(FreePlacesMixin, TimestampModel):
         "Возраст до", help_text="в годах", null=True, blank=False
     )
 
-    favorite_users = models.ManyToManyField(
-        User,
-        related_name='favorite_courses',
-        verbose_name='Пользователи (избранное)'
-    )
-
     def __str__(self):
         return self.name
 
 
 class LessonDay(models.Model):
     class Meta:
-        verbose_name = "Дни занятии"
-        verbose_name_plural = "День занятия"
+        verbose_name = "День занятия"
+        verbose_name_plural = "Дни занятий"
 
     course = models.ForeignKey(
         Course,
@@ -140,8 +140,8 @@ class LessonDay(models.Model):
 
 class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     class Meta:
-        verbose_name = "Урок"
-        verbose_name_plural = "Уроки"
+        verbose_name = "Занятие"
+        verbose_name_plural = "Занятия"
 
     course = models.ForeignKey(
         Course,
@@ -154,6 +154,12 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     day = models.DateField("День проведения")
     start_time = models.TimeField("Время начала")
     end_time = models.TimeField("Время конца")
+
+    favorite_users = models.ManyToManyField(
+        User,
+        related_name='favorite_lessons',
+        verbose_name='Пользователи (избранное)'
+    )
 
     @classmethod
     @transaction.atomic
@@ -189,3 +195,35 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     def __str__(self):
         return f"Занитие по курсу {self.course.name} " \
                f"({self.day} с {self.start_time} по {self.end_time})"
+
+
+class CourseReview(ReviewMixin):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='course_reviews',
+        verbose_name='Пользователь'
+    )
+    helped = models.ManyToManyField(
+        User,
+        related_name='course_helped',
+        verbose_name='Помог'
+    )
+    not_helped = models.ManyToManyField(
+        User,
+        related_name='course_not_helped',
+        verbose_name='Не помог'
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Курс'
+    )
+
+    class Meta:
+        verbose_name = 'Отзыв курса'
+        verbose_name_plural = 'Отзывы курсов'
+
+    def __str__(self):
+        return f'({self.id}) {self.user.full_name}, {self.course}'

@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import models
 from django.contrib.auth import get_user_model
 
-from apps.core.models import CityModel
+from apps.core.models import CityModel, TimestampModel, ReviewMixin
 
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -139,3 +139,35 @@ class Club(ContactInfo, AdditionalInformation):
 class ClubImage(models.Model):
     club = models.ForeignKey(Club, related_name="images", on_delete=models.CASCADE)
     image = models.ImageField(upload_to="club_images/")
+
+
+class ClubReview(ReviewMixin):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='club_reviews',
+        verbose_name='Пользователь'
+    )
+    helped = models.ManyToManyField(
+        User,
+        related_name='club_helped',
+        verbose_name='Помог'
+    )
+    not_helped = models.ManyToManyField(
+        User,
+        related_name='club_not_helped',
+        verbose_name='Не помог'
+    )
+    club = models.ForeignKey(
+        Club,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+        verbose_name='Клуб'
+    )
+
+    class Meta:
+        verbose_name = 'Отзыв клуба'
+        verbose_name_plural = 'Отзывы клубов'
+
+    def __str__(self):
+        return f'({self.id}) {self.user.full_name}, {self.club}'
