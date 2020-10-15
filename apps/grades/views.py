@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,9 +15,10 @@ from apps.users.views import PartnerAPIMixin
 from apps.core.views import PublicAPIMixin
 from apps.utils import distance
 
-from .models import Grade, Course, Lesson, GradeType
+from .models import Grade, Course, Lesson, GradeType, CourseReview
 from .serializers import (
-    GradeSerializer, CourseSerializer, LessonSerializer, GradeTypeListSerializer
+    GradeSerializer, CourseSerializer, LessonSerializer, GradeTypeListSerializer, LessonRetrieveSerializer,
+    CourseReviewCreateSerializer, CourseReviewSerializer, CourseReviewHelpedSerializer
 )
 from .filters import CoursesFilterBackend
 
@@ -61,11 +62,19 @@ class CourseListViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
     serializer_class = CourseSerializer
 
 
-class LessonViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
+class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Lesson.objects.all()
     filterset_fields = ["day"]
-    serializer_class = LessonSerializer
     filter_backends = [CoursesFilterBackend]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return LessonSerializer
+        elif self.action == 'retrieve':
+            return LessonRetrieveSerializer
+        elif self.action == 'leave_review':
+            return CourseReviewCreateSerializer
+        return LessonSerializer
 
     def filter_queryset(self, queryset):
         if self.request.query_params.get('city'):
@@ -125,3 +134,35 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
             user.favorite_courses.add(lesson)
         user.save()
         return Response()
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def leave_review(self, request, pk=None):
+        lesson = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user, course=lesson.course)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], filter_backends=[], pagination_class=None)
+    def more_reviews(self, request, pk=None):
+        instance = self.get_object()
+        serializer = CourseReviewSerializer(instance.course.reviews, many=True)
+        return Response(serializer.data)
+
+
+class CourseReviewViewSet(GenericViewSet):
+    queryset = CourseReview.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'helped':
+            return CourseReviewHelpedSerializer
+        return CourseReviewHelpedSerializer
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def helped(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance=instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

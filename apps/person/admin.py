@@ -1,3 +1,13 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import ClientProfile, Coach
+
+
+@admin.register(ClientProfile)
+class ClientProfile(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Coach)
+class CoachProfile(admin.ModelAdmin):
+    pass

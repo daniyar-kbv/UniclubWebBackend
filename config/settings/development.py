@@ -42,6 +42,7 @@ LOCAL_APPS = [
     "apps.grades.apps.GradesConfig",
     "apps.sms.apps.SmsConfig",
     "apps.subscriptions.apps.SubscriptionsConfig",
+    "apps.test.apps.TestConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

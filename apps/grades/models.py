@@ -19,7 +19,7 @@ class GradeType(models.Model):
     name = models.CharField("Название", max_length=120)
 
     def __str__(self):
-        return self.name
+        return f'({self.id}) {self.name}'
 
 
 class Grade(TimestampModel):
@@ -43,7 +43,7 @@ class Grade(TimestampModel):
     )
 
     def __str__(self):
-        return f'{self.club.name}: {self.grade_type.name}'
+        return f'({self.id}) {self.club.name}: {self.grade_type.name}'
 
 
 class FreePlacesMixin(models.Model):
@@ -103,6 +103,7 @@ class Course(FreePlacesMixin, TimestampModel):
     level = models.CharField(
         "Уровень подготовки", max_length=20, choices=Levels.choices
     )
+
     start_date = models.DateField("Дата начала")
     end_date = models.DateField("Дата окончания")
 
@@ -112,9 +113,24 @@ class Course(FreePlacesMixin, TimestampModel):
     to_age = models.PositiveSmallIntegerField(
         "Возраст до", help_text="в годах", null=True, blank=False
     )
+    additional_conditions = models.TextField(
+        "Дополнительные условия", null=True, blank=True
+    )
+    needed_inventory = models.CharField(
+        "Необходимый инвентарь", max_length=500, null=True, blank=True
+    )
+    needed_accessories = models.CharField(
+        "Необходимые принадлежности", max_length=500, null=True, blank=True
+    )
+    dress_code = models.CharField(
+        "Форма одежды", max_length=500, null=True, blank=True
+    )
+    is_certificate = models.BooleanField(
+        "Сертификат об окончании курса", default=False, null=True, blank=True
+    )
 
     def __str__(self):
-        return self.name
+        return f'({self.id}) {self.name}'
 
 
 class LessonDay(models.Model):
@@ -187,7 +203,10 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
                     course=course,
                     day=start_date,
                     start_time=lesson_days[weekday]["start_time"],
-                    end_time=lesson_days[weekday]["end_time"]
+                    end_time=lesson_days[weekday]["end_time"],
+                    unipass_places=course.unipass_places,
+                    uniclass_places=course.uniclass_places,
+                    regular_places=course.regular_places,
                 )
                 new_lesson.save()
             start_date += delta

@@ -12,12 +12,15 @@ from drf_yasg.utils import swagger_auto_schema
 from apps.core.views import PublicAPIMixin
 from apps.users.views import PartnerAPIMixin
 
-from .models import Club
+from .models import Club, ClubReview
 from .serializers import (
     ClubRetrieveSerializer,
     ClubListSerializer,
     ClubUpdateSerializer,
     ClubForFilterSerializer,
+    ClubReviewCreateSerializer,
+    ClubReviewSerializer,
+    ReviewHelpedSerializer,
 )
 from .filters import ClubsFilterBackend
 
@@ -31,8 +34,10 @@ class ClubViewSet(
     def get_serializer_class(self):
         if self.action == "retrieve":
             return ClubRetrieveSerializer
-        if self.action == "list":
+        elif self.action == "list":
             return ClubListSerializer
+        elif self.action == 'leave_review':
+            return ClubReviewCreateSerializer
         return ClubListSerializer
 
     def filter_queryset(self, queryset):
@@ -84,6 +89,20 @@ class ClubViewSet(
     def for_filter(self, request, pk=None):
         return Response(ClubForFilterSerializer(Club.objects.all(), many=True).data)
 
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def leave_review(self, request, pk=None):
+        club = self.get_object()
+        serializer = ClubReviewCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user, club=club)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], filter_backends=[], pagination_class=None)
+    def more_reviews(self, request, pk=None):
+        instance = self.get_object()
+        serializer = ClubReviewSerializer(instance.reviews, many=True)
+        return Response(serializer.data)
+
 
 class ClubUpdateView(
     PartnerAPIMixin, APIView
@@ -112,4 +131,22 @@ class ClubUpdateView(
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        return Response(serializer.data)
+
+
+class ClubReviewViewSet(GenericViewSet):
+    queryset = ClubReview.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'helped':
+            return ReviewHelpedSerializer
+        return ReviewHelpedSerializer
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def helped(self, request, pk=None):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance=instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)

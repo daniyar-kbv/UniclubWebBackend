@@ -9,11 +9,25 @@ from apps.person.serializers import CoachClubSerializer
 
 
 class ClubReviewSerializer(serializers.ModelSerializer):
-    user = UserShortSerializer()
+    user = UserShortSerializer(read_only=True)
+    helped = serializers.SerializerMethodField()
+    not_helped = serializers.SerializerMethodField()
 
     class Meta:
         model = ClubReview
         exclude = ['club']
+
+    def get_helped(self, obj):
+        return obj.helped.count()
+
+    def get_not_helped(self, obj):
+        return obj.not_helped.count()
+
+
+class ClubReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClubReview
+        fields = ['rating', 'advantages', 'disadvantages', 'comment']
 
 
 class ClubImageSerializer(serializers.ModelSerializer):
@@ -26,7 +40,8 @@ class ClubRetrieveSerializer(serializers.ModelSerializer):
     images = ClubImageSerializer(many=True)
     grades = serializers.SerializerMethodField()
     coaches = serializers.SerializerMethodField()
-    reviews = serializers.SerializerMethodField()
+    review = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Club
@@ -36,7 +51,7 @@ class ClubRetrieveSerializer(serializers.ModelSerializer):
                   "other_services", "parking_available", "places_for_parents", "parent_presence", "video_monitoring",
                   "classes_for_disabled", "floor_area", "number_of_bathrooms", "number_of_changing_rooms",
                   "total_number_of_students", "social_reviews", "from_age", "to_age", "is_new", "name", "city",
-                  "club_admin", "grades", "coaches", "reviews"]
+                  "club_admin", "rating", "grades", "coaches", "review"]
 
     def get_grades(self, obj):
         grades = GradeType.objects.filter(grades__club=obj)
@@ -48,14 +63,26 @@ class ClubRetrieveSerializer(serializers.ModelSerializer):
         serializer = CoachClubSerializer(coaches, many=True)
         return serializer.data
 
-    def get_reviews(self, obj):
-        reviews = obj.reviews
-        serializer = ClubReviewSerializer(reviews, many=True)
-        return serializer.data
+    def get_review(self, obj):
+        review = ClubReview.objects.filter(club=obj).order_by('-created_at').first()
+        if review:
+            serializer = ClubReviewSerializer(review)
+            return serializer.data
+        return review
+
+    def get_rating(self, obj):
+        count = ClubReview.objects.filter(club=obj).count()
+        if count == 0:
+            return 0
+        sum = 0
+        for review in ClubReview.objects.filter(club=obj):
+            sum += review.rating
+        return sum / count
 
 
 class ClubListSerializer(serializers.ModelSerializer):
     is_favorite = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Club
@@ -69,12 +96,23 @@ class ClubListSerializer(serializers.ModelSerializer):
             "image",
             "is_new",
             "is_favorite",
+            "rating",
         )
 
     def get_is_favorite(self, obj):
         if not self.context.get('user'):
             return None
         return obj.favorite_users.filter(id=self.context.get('user')).exists()
+
+    def get_rating(self, obj):
+        count = ClubReview.objects.filter(club=obj).count()
+        if count == 0:
+            return 0
+        sum = 0
+        for review in ClubReview.objects.filter(club=obj):
+            sum += review.rating
+        return sum / count
+
 
 
 class ClubForFilterSerializer(serializers.ModelSerializer):
@@ -97,3 +135,28 @@ class ClubUpdateSerializer(serializers.ModelSerializer):
         if data.get('from_age') > data.get('to_age'):
             raise serializers.ValidationError("Возраст от должен быть меньше чем возраст до")
         return data
+
+
+class ReviewHelpedSerializer(serializers.ModelSerializer):
+    helped = serializers.BooleanField(required=True)
+
+    class Meta:
+        model = ClubReview
+        fields = ['helped']
+
+    def update(self, instance, validated_data):
+        user = self.context.get('request').user
+        if validated_data.get('helped'):
+            if instance.helped.filter(id=user.id).exists():
+                instance.helped.remove(user)
+            else:
+                instance.helped.add(user)
+                instance.not_helped.remove(user)
+        else:
+            if instance.not_helped.filter(id=user.id).exists():
+                instance.not_helped.remove(user)
+            else:
+                instance.not_helped.add(user)
+                instance.helped.remove(user)
+        instance.save()
+        return instance

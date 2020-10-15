@@ -55,7 +55,7 @@ class ClientProfile(AdditionalInformationMixin):
     )
 
     def __str__(self):
-        return self.user.full_name
+        return f'({self.id}) {self.user.full_name}'
 
 
 class ClientChildren(NameModel, AdditionalInformationMixin):

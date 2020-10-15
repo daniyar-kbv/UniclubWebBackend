@@ -129,11 +129,12 @@ class Club(ContactInfo, AdditionalInformation):
     favorite_users = models.ManyToManyField(
         User,
         related_name='favorite_clubs',
-        verbose_name='Пользователи (избранное)'
+        verbose_name='Пользователи (избранное)',
+        blank=True
     )
 
     def __str__(self):
-        return str(self.name)
+        return f'({self.id}) {str(self.name)}'
 
 
 class ClubImage(models.Model):
@@ -151,12 +152,14 @@ class ClubReview(ReviewMixin):
     helped = models.ManyToManyField(
         User,
         related_name='club_helped',
-        verbose_name='Помог'
+        verbose_name='Помог',
+        blank=True
     )
     not_helped = models.ManyToManyField(
         User,
         related_name='club_not_helped',
-        verbose_name='Не помог'
+        verbose_name='Не помог',
+        blank=True
     )
     club = models.ForeignKey(
         Club,

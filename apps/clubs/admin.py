@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Club, ClubImage
+from .models import Club, ClubImage, ClubReview
 
 
 class ClubImageInline(admin.StackedInline):
@@ -14,3 +14,8 @@ class ClubAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Club, ClubAdmin)
+
+
+@admin.register(ClubReview)
+class ClubReviewAdmin(admin.ModelAdmin):
+    pass
