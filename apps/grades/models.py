@@ -226,12 +226,14 @@ class CourseReview(ReviewMixin):
     helped = models.ManyToManyField(
         User,
         related_name='course_helped',
-        verbose_name='Помог'
+        verbose_name='Помог',
+        blank=True
     )
     not_helped = models.ManyToManyField(
         User,
         related_name='course_not_helped',
-        verbose_name='Не помог'
+        verbose_name='Не помог',
+        blank=True
     )
     course = models.ForeignKey(
         Course,
