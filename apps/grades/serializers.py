@@ -2,9 +2,18 @@ from django.db import transaction
 from rest_framework import serializers
 
 from apps.clubs.models import Club, ClubReview, ClubImage
-from apps.person.serializers import CoachClubSerializer
 from apps.users.serializers import UserShortSerializer
-from .models import Grade, Course, LessonDay, Lesson, GradeType, CourseReview
+from apps.utils import general
+from .models import Grade, Course, LessonDay, Lesson, GradeType, CourseReview, GradeTypeGroup, AttendanceType, \
+    LessonUserStatus, Coach
+
+import constants
+
+
+class CoachClubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coach
+        exclude = ['club', 'course']
 
 
 class ClubReviewSerializer(serializers.ModelSerializer):
@@ -38,7 +47,15 @@ class ClubRetrieveSerializer(serializers.ModelSerializer):
 class GradeTypeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = GradeType
-        fields = '__all__'
+        exclude = ['group']
+
+
+class GradeTypeGroupWithTypesSerializer(serializers.ModelSerializer):
+    types = GradeTypeListSerializer(many=True)
+
+    class Meta:
+        model = GradeTypeGroup
+        fields = ['id', 'name', 'types']
 
 
 class GradeListSerializer(serializers.ModelSerializer):
@@ -226,3 +243,34 @@ class CourseReviewHelpedSerializer(serializers.ModelSerializer):
                 instance.helped.remove(user)
         instance.save()
         return instance
+
+
+class AttendanceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendanceType
+        fields = '__all__'
+
+
+class LessonScheduleSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lesson
+        fields = ['id', 'name', 'start_time', 'end_time', 'status']
+
+    def get_name(self, obj):
+        return obj.course.name
+
+    def get_status(self, obj):
+        try:
+            status = LessonUserStatus.objects.get(lesson=obj, user=self.context.get('user'))
+            return general.get_value_from_choices(constants.LESSON_STATUSES, status)
+        except:
+            return None
+
+
+class LessonUserStatusCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonUserStatus
+        fields = ['status']

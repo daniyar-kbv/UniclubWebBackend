@@ -10,4 +10,5 @@ urlpatterns = [
     path("subscriptioins/", include("apps.subscriptions.urls")),
     path("core/", include("apps.core.urls")),
     path("test/", include("apps.test.urls")),
+    path("mobile/", include("apps.mobile.urls")),
 ]

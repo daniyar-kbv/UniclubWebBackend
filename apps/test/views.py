@@ -4,9 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from apps.users.models import User
-from apps.person.models import Coach
 from apps.core.views import PublicAPIMixin
-from apps.grades.models import Grade, Course, CourseReview
+from apps.grades.models import Grade, Course, CourseReview, Coach
 from apps.clubs.models import ClubReview
 
 from .serializers import ClientCreateSerializer, PartnerCreateSerializer, CoachCreateSerializer, GradeCreateSerializer, \

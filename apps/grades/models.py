@@ -5,18 +5,40 @@ from django.db import models, transaction
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from apps.core.models import TimestampModel, ReviewMixin
+from apps.core.models import TimestampModel, ReviewMixin, NameModel
 from apps.clubs.models import Club
 from apps.users.models import User
+from apps.utils import general
 
 from . import Levels, Intensities, Durations
+
+import constants
+
+
+class GradeTypeGroup(models.Model):
+    name = models.CharField('Название', max_length=100)
+
+    class Meta:
+        verbose_name = 'Группа занятий'
+        verbose_name_plural = 'Группы занятий'
+
+    def __str__(self):
+        return f'({self.id}) {self.name}'
 
 
 class GradeType(models.Model):
     class Meta:
         verbose_name = "Вид занятия"
         verbose_name_plural = "Виды занятий"
+
     name = models.CharField("Название", max_length=120)
+    group = models.ForeignKey(
+        GradeTypeGroup,
+        verbose_name='Группа занятий',
+        related_name='types',
+        on_delete=models.CASCADE,
+        null=True
+    )
 
     def __str__(self):
         return f'({self.id}) {self.name}'
@@ -76,6 +98,17 @@ class BookedPlacesMixin(models.Model):
         abstract = True
 
 
+class AttendanceType(models.Model):
+    name = models.CharField('Название', max_length=100)
+
+    class Meta:
+        verbose_name = 'Вид посещения'
+        verbose_name_plural = 'Виды посещения'
+
+    def __str__(self):
+        return f'({self.id}) {self.name}'
+
+
 class Course(FreePlacesMixin, TimestampModel):
     class Meta:
         verbose_name = "Курсы"
@@ -128,15 +161,40 @@ class Course(FreePlacesMixin, TimestampModel):
     is_certificate = models.BooleanField(
         "Сертификат об окончании курса", default=False, null=True, blank=True
     )
+    attendance_type = models.ForeignKey(
+        AttendanceType,
+        on_delete=models.SET_NULL,
+        verbose_name='Вид посещения',
+        related_name='courses',
+        null=True
+    )
 
     def __str__(self):
         return f'({self.id}) {self.name}'
+
+
+class Coach(NameModel):
+    class Meta:
+        verbose_name = "Тренеры"
+        verbose_name_plural = "Тренер"
+
+    club = models.ForeignKey(
+        Club, related_name="coaches", on_delete=models.CASCADE, verbose_name="Клуб"
+    )
+    course = models.ForeignKey(
+        Course, related_name="coaches", on_delete=models.CASCADE, verbose_name="Курс"
+    )
+    image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
+
+    def __str__(self):
+        return self.full_name
 
 
 class LessonDay(models.Model):
     class Meta:
         verbose_name = "День занятия"
         verbose_name_plural = "Дни занятий"
+        ordering = ['weekday', 'start_time']
 
     course = models.ForeignKey(
         Course,
@@ -145,13 +203,23 @@ class LessonDay(models.Model):
     )
     weekday = models.PositiveSmallIntegerField(
         verbose_name="День недели",
-        validators=[
-            MinValueValidator(0),
-            MaxValueValidator(6)
-        ]
+        choices=constants.WEEKDAYS,
+        null=False,
+        blank=False
+    )
+    coach = models.ForeignKey(
+        Coach,
+        verbose_name='Тренер',
+        related_name='lesson_days',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=False
     )
     start_time = models.TimeField("Время начала")
     end_time = models.TimeField("Время окончания")
+
+    def __str__(self):
+        return f'({self.id}) {self.course.grade.club.name}, {self.course.name}: {general.get_value_from_choices(constants.WEEKDAYS, self.weekday)}, {self.start_time}-{self.end_time}'
 
 
 class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
@@ -167,6 +235,15 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
         null=True
     )
 
+    lesson_day = models.ForeignKey(
+        LessonDay,
+        on_delete=models.CASCADE,
+        verbose_name='День занятия',
+        related_name='lesson_days',
+        null=True,
+        blank=False
+    )
+
     day = models.DateField("День проведения")
     start_time = models.TimeField("Время начала")
     end_time = models.TimeField("Время конца")
@@ -174,7 +251,36 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     favorite_users = models.ManyToManyField(
         User,
         related_name='favorite_lessons',
-        verbose_name='Пользователи (избранное)'
+        verbose_name='Пользователи (избранное)',
+        blank=True
+    )
+
+    unipass_users = models.ManyToManyField(
+        User,
+        related_name='unipass_lessons',
+        verbose_name='Пользователи UniPass',
+        blank=True
+    )
+    uniclass_users = models.ManyToManyField(
+        User,
+        related_name='uniclass_lessons',
+        verbose_name='Пользователи UniClass',
+        blank=True
+    )
+    regular_users = models.ManyToManyField(
+        User,
+        related_name='regular_lessons',
+        verbose_name='Пользователи абонимент',
+        blank=True
+    )
+
+    coach = models.ForeignKey(
+        Coach,
+        on_delete=models.CASCADE,
+        related_name='lessons',
+        verbose_name='Тренер',
+        null=True,
+        blank=False
     )
 
     @classmethod
@@ -189,21 +295,22 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
         delta = timedelta(days=1)
 
         lesson_days = {
-            lesson_day.weekday: {
+            weekday: [{
                 "start_time": lesson_day.start_time,
                 "end_time": lesson_day.end_time
-            }
-            for lesson_day in cast(Iterable[LessonDay], course.lesson_days.all())
+            } for lesson_day in course.lesson_days.filter(weekday=weekday)]
+            for weekday in range(0, 7)
         }
 
         while start_date <= end_date:
             weekday = start_date.weekday()
-            if weekday in lesson_days.keys():
+
+            for lesson_day in lesson_days[weekday]:
                 new_lesson = cls(
                     course=course,
                     day=start_date,
-                    start_time=lesson_days[weekday]["start_time"],
-                    end_time=lesson_days[weekday]["end_time"],
+                    start_time=lesson_day["start_time"],
+                    end_time=lesson_day["end_time"],
                     unipass_places=course.unipass_places,
                     uniclass_places=course.uniclass_places,
                     regular_places=course.regular_places,
@@ -214,6 +321,35 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     def __str__(self):
         return f"Занитие по курсу {self.course.name} " \
                f"({self.day} с {self.start_time} по {self.end_time})"
+
+
+class LessonUserStatus(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='lesson_statuses',
+        verbose_name='Пользователь',
+    )
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        verbose_name='Занятие',
+        related_name='lesson_statuses'
+    )
+    status = models.PositiveSmallIntegerField(
+        'Статус',
+        choices=constants.LESSON_STATUSES,
+        default=None,
+        null=True,
+        blank=False
+    )
+
+    class Meta:
+        verbose_name = 'Статус занятия с ребенком'
+        verbose_name_plural = 'Статусы занятий с детьми'
+
+    def __str__(self):
+        return f'({self.id}) {self.user}, {self.lesson.course.name}'
 
 
 class CourseReview(ReviewMixin):

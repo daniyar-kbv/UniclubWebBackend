@@ -1,19 +1,26 @@
 from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.generics import UpdateAPIView
+from rest_framework.mixins import ListModelMixin, UpdateModelMixin, RetrieveModelMixin
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from apps.users.views import PartnerAPIMixin, ClientAPIMixin
+from apps.grades.models import Coach
 
-from .models import Coach, ClientChildren, ClientProfile
+from .models import ClientChildren, ClientProfile
 from .serializers import (
     CoachSerializer,
     ClientProfileUpdateSerializer,
-    ClientChildrenSerializer
+    ClientChildrenSerializer,
+    ScheduleSerializer
 )
+from .filters import ScheduleFilterBackend
+
+import datetime, constants
 
 User = get_user_model()
 
@@ -29,26 +36,45 @@ class CoachViewset(PartnerAPIMixin, ModelViewSet):
         serializer.save(club=self.get_club())
 
 
-class UpdateClientProfileView(ClientAPIMixin, APIView):
-    @swagger_auto_schema(
-        responses={200: ClientProfileUpdateSerializer}
-    )
-    def get(self, request, *args, **kwargs):
-        serializer = ClientProfileUpdateSerializer(
-            request.user
-        )
-        return Response(serializer.data)
+class UpdateClientProfileViewSet(ClientAPIMixin,
+                                 GenericViewSet,
+                                 RetrieveModelMixin,
+                                 UpdateModelMixin):
+    queryset = User.objects.all()
 
-    @swagger_auto_schema(
-        request_body=ClientProfileUpdateSerializer,
-        responses={200: ClientProfileUpdateSerializer}
-    )
-    def post(self, request, *args, **kwargs):
-        serializer = ClientProfileUpdateSerializer(
-            instance=request.user, data=request.data, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+    def get_serializer_class(self):
+        if self.action in ['retrieve', 'update']:
+            return ClientProfileUpdateSerializer
+        return ClientProfileUpdateSerializer
+
+    @action(detail=False, methods=['get'], filter_backends=[ScheduleFilterBackend])
+    def schedule(self, request, pk=None):
+        dt = datetime.date.today()
+        start = dt - datetime.timedelta(days=dt.weekday())
+        end = start + datetime.timedelta(days=6)
+        if self.request.query_params.get('from_date') and self.request.query_params.get('to_date'):
+            try:
+                start = datetime.datetime.strptime(
+                    self.request.query_params.get('from_date'), constants.DATE_FORMAT
+                ).date()
+            except:
+                return Response({
+                    'start_time': 'Формат времени: YYYY-MM-DD'
+                })
+            try:
+                end = datetime.datetime.strptime(
+                    self.request.query_params.get('to_date'), constants.DATE_FORMAT
+                ).date()
+            except:
+                return Response({
+                    'start_time': 'Формат времени: YYYY-MM-DD'
+                })
+        delta = (end + datetime.timedelta(days=1)) - start
+        dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
+        context = {
+            'user': request.user
+        }
+        serializer = ScheduleSerializer(dates, many=True, context=context)
         return Response(serializer.data)
 
 

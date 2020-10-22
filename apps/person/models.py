@@ -4,7 +4,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 from apps.clubs.models import Club
 from apps.core.models import NameModel, CityModel
-from apps.grades.models import Course
 
 from . import Gender
 
@@ -17,23 +16,6 @@ class AdditionalInformationMixin(models.Model):
 
     class Meta:
         abstract = True
-
-
-class Coach(NameModel):
-    class Meta:
-        verbose_name = "Тренеры"
-        verbose_name_plural = "Тренер"
-
-    club = models.ForeignKey(
-        Club, related_name="coaches", on_delete=models.CASCADE, verbose_name="Клуб"
-    )
-    course = models.ForeignKey(
-        Course, related_name="coaches", on_delete=models.CASCADE, verbose_name="Курс"
-    )
-    image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
-
-    def __str__(self):
-        return self.full_name
 
 
 class ClientProfile(AdditionalInformationMixin):

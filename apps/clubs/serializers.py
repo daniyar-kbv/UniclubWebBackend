@@ -3,9 +3,8 @@ from rest_framework import serializers
 
 from .models import Club, ClubImage, ClubReview
 from apps.users.serializers import UserShortSerializer
-from apps.grades.serializers import GradeTypeListSerializer
+from apps.grades.serializers import GradeTypeListSerializer, CoachClubSerializer
 from apps.grades.models import GradeType
-from apps.person.serializers import CoachClubSerializer
 
 
 class ClubReviewSerializer(serializers.ModelSerializer):

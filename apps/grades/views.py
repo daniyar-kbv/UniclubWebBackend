@@ -12,15 +12,19 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from apps.users.views import PartnerAPIMixin
+from apps.users.permissions import IsClient
 from apps.core.views import PublicAPIMixin
 from apps.utils import distance
 
-from .models import Grade, Course, Lesson, GradeType, CourseReview
+from .models import Grade, Course, Lesson, GradeType, CourseReview, LessonUserStatus
 from .serializers import (
     GradeSerializer, CourseSerializer, LessonSerializer, GradeTypeListSerializer, LessonRetrieveSerializer,
-    CourseReviewCreateSerializer, CourseReviewSerializer, CourseReviewHelpedSerializer
+    CourseReviewCreateSerializer, CourseReviewSerializer, CourseReviewHelpedSerializer,
+    LessonUserStatusCreateSerializer
 )
 from .filters import CoursesFilterBackend
+
+import datetime
 
 
 class GradeTypesViewSet(PublicAPIMixin,
@@ -74,6 +78,8 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericV
             return LessonRetrieveSerializer
         elif self.action == 'leave_review':
             return CourseReviewCreateSerializer
+        elif self.action == 'set_status':
+            return LessonUserStatusCreateSerializer
         return LessonSerializer
 
     def filter_queryset(self, queryset):
@@ -147,6 +153,21 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericV
     def more_reviews(self, request, pk=None):
         instance = self.get_object()
         serializer = CourseReviewSerializer(instance.course.reviews, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsClient])
+    def set_status(self, request, pk=None):
+        instance = self.get_object()
+        if instance.day < datetime.date.today() or (instance.day == datetime.date.today() and instance.end_time < datetime.datetime.now().time()):
+            return Response('Это занятие уже прошло', status.HTTP_400_BAD_REQUEST)
+        try:
+            LessonUserStatus.objects.get(lesson=instance, user=request.user)
+            return Response('У этого занятия уже существует статус', status.HTTP_400_BAD_REQUEST)
+        except:
+            pass
+        serializer = LessonUserStatusCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user, lesson=instance)
         return Response(serializer.data)
 
 

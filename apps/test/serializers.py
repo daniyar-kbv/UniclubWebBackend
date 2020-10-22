@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from apps.users.models import User
-from apps.person.models import ClientProfile, Coach
+from apps.person.models import ClientProfile
 from apps.clubs.models import Club, ClubReview, ClubImage
-from apps.grades.models import Grade, Course, LessonDay, Lesson, CourseReview
+from apps.grades.models import Grade, Course, LessonDay, Lesson, CourseReview, Coach
 
 
 class ClientProfileCreateSerializer(serializers.ModelSerializer):

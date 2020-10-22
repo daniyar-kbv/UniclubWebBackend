@@ -1,17 +1,16 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 from .models import (
-    Coach, ClientProfile, ClientChildren
+    ClientProfile, ClientChildren
 )
+from apps.grades.models import Coach, LessonUserStatus, Lesson
+from apps.grades.serializers import LessonScheduleSerializer
+
+import constants, datetime
 
 User = get_user_model()
-
-
-class CoachClubSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Coach
-        exclude = ['club', 'course']
 
 
 class CoachSerializer(serializers.ModelSerializer):
@@ -61,4 +60,20 @@ class ClientChildrenSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             "parent": {"required": False}
+        }
+
+
+class ScheduleSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        user = self.context.get('user')
+        lessons = Lesson.objects.filter(
+            Q(
+                Q(regular_users=user) | Q(uniclass_users=user) | Q(unipass_users=user)
+            ) & Q(day=instance)
+        ).order_by('start_time')
+        lessons_serializer = LessonScheduleSerializer(lessons, many=True, context=self.context)
+        return {
+            'date': instance.strftime(constants.DATE_FORMAT),
+            'weekday': instance.weekday(),
+            'lessons': lessons_serializer.data
         }
