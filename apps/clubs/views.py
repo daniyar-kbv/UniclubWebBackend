@@ -11,6 +11,9 @@ from drf_yasg.utils import swagger_auto_schema
 
 from apps.core.views import PublicAPIMixin
 from apps.users.views import PartnerAPIMixin
+from apps.users.permissions import IsPartner
+from apps.grades.serializers import LessonClubScheduleSerializer
+from apps.grades.models import Lesson
 
 from .models import Club, ClubReview
 from .serializers import (
@@ -22,7 +25,9 @@ from .serializers import (
     ClubReviewSerializer,
     ReviewHelpedSerializer,
 )
-from .filters import ClubsFilterBackend
+from .filters import ClubsFilterBackend, ClubScheduleFilterBackend
+
+import datetime, constants
 
 
 class ClubViewSet(
@@ -38,13 +43,17 @@ class ClubViewSet(
             return ClubListSerializer
         elif self.action == 'leave_review':
             return ClubReviewCreateSerializer
+        elif self.action == 'admin':
+            return ClubUpdateSerializer
+        elif self.action == 'schedule_main':
+            return LessonClubScheduleSerializer
         return ClubListSerializer
 
     def filter_queryset(self, queryset):
         if self.request.query_params.get('city'):
             queryset = queryset.filter(city_id=self.request.query_params.get('city'))
         if self.request.query_params.get('grade_type'):
-            queryset = queryset.filter(grades__grade_type=self.request.query_params.get('grade_type'))
+            queryset = queryset.filter(courses__grade_type=self.request.query_params.get('grade_type'))
         if self.request.query_params.get('club'):
             queryset = queryset.filter(id=self.request.query_params.get('club'))
         if self.request.query_params.get('age'):
@@ -103,34 +112,34 @@ class ClubViewSet(
         serializer = ClubReviewSerializer(instance.reviews, many=True)
         return Response(serializer.data)
 
+    @action(detail=False,
+            methods=['get', 'post'],
+            filter_backends=[],
+            pagination_class=None,
+            permission_classes=[IsPartner])
+    def admin(self, request, pk=None):
+        instance = self.request.user.club
+        if request.method == 'GET':
+            serializer = ClubUpdateSerializer(instance)
+            return Response(serializer.data)
+        elif request.method == 'POST':
+            serializer = ClubUpdateSerializer(data=request.data, instance=instance, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
-class ClubUpdateView(
-    PartnerAPIMixin, APIView
-):
-    @swagger_auto_schema(
-        responses={200: ClubUpdateSerializer}
-    )
-    def get(self, request, *args, **kwargs):
-        """
-        Получение данных клуба (для админа клуба)
-        """
-        instance = self.get_club()
-        serializer = ClubUpdateSerializer(instance)
-
-        return Response(serializer.data)
-
-    @swagger_auto_schema(
-        request_body=ClubUpdateSerializer, responses={200: ClubUpdateSerializer}
-    )
-    def post(self, request, *args, **kwargs):
-        """
-        Редактирование данных клуба (для админа клуба)
-        """
-        instance = self.get_club()
-        serializer = ClubUpdateSerializer(data=request.data, instance=instance, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
+    @action(detail=False,
+            methods=['get'],
+            filter_backends=[ClubScheduleFilterBackend],
+            pagination_class=None,
+            permission_classes=[IsPartner])
+    def schedule_main(self, request, pk=None):
+        instance = self.request.user.club
+        date = datetime.datetime.strptime(self.request.query_params.get('date'), constants.DATE_FORMAT) \
+            if self.request.query_params.get('date') \
+            else datetime.date.today()
+        lessons = Lesson.objects.filter(course__club=instance, day=date).order_by('start_time')
+        serializer = LessonClubScheduleSerializer(lessons, many=True)
         return Response(serializer.data)
 
 

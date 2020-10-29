@@ -5,8 +5,9 @@ from django.db.models import Q
 from .models import (
     ClientProfile, ClientChildren
 )
-from apps.grades.models import Coach, LessonUserStatus, Lesson
+from apps.grades.models import Coach, Lesson
 from apps.grades.serializers import LessonScheduleSerializer
+from apps.subscriptions.models import LessonBooking
 
 import constants, datetime
 
@@ -65,11 +66,9 @@ class ClientChildrenSerializer(serializers.ModelSerializer):
 
 class ScheduleSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
-        user = self.context.get('user')
+        child = self.context.get('child')
         lessons = Lesson.objects.filter(
-            Q(
-                Q(regular_users=user) | Q(uniclass_users=user) | Q(unipass_users=user)
-            ) & Q(day=instance)
+            Q(bookings__user=child) & Q(day=instance)
         ).order_by('start_time')
         lessons_serializer = LessonScheduleSerializer(lessons, many=True, context=self.context)
         return {
@@ -77,3 +76,4 @@ class ScheduleSerializer(serializers.BaseSerializer):
             'weekday': instance.weekday(),
             'lessons': lessons_serializer.data
         }
+

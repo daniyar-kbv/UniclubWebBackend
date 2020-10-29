@@ -8,6 +8,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from apps.core.models import TimestampModel, ReviewMixin, NameModel
 from apps.clubs.models import Club
 from apps.users.models import User
+from apps.person.models import ClientChildren
 from apps.utils import general
 
 from . import Levels, Intensities, Durations
@@ -44,30 +45,6 @@ class GradeType(models.Model):
         return f'({self.id}) {self.name}'
 
 
-class Grade(TimestampModel):
-    class Meta:
-        verbose_name = "Вид занятия клуба"
-        verbose_name_plural = "Виды занятий клуба"
-
-    club = models.ForeignKey(
-        Club,
-        related_name="grades",
-        verbose_name="Клуб",
-        on_delete=models.CASCADE
-    )
-    grade_type = models.ForeignKey(
-        GradeType,
-        related_name='grades',
-        verbose_name='Вид занятия',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=False
-    )
-
-    def __str__(self):
-        return f'({self.id}) {self.club.name}: {self.grade_type.name}'
-
-
 class FreePlacesMixin(models.Model):
     unipass_places = models.PositiveSmallIntegerField(
         "Максимальное количество мест для UniPass", default=0
@@ -76,7 +53,7 @@ class FreePlacesMixin(models.Model):
         "Максимальное количество мест для UniClass", default=0
     )
     regular_places = models.PositiveSmallIntegerField(
-        "Максимальное количество обычных мест", default=0
+        "Максимальное общее количество мест", default=0
     )
 
     class Meta:
@@ -91,7 +68,7 @@ class BookedPlacesMixin(models.Model):
         "Текущее количество занятых мест UniClass", default=0
     )
     regular_clients = models.PositiveSmallIntegerField(
-        "Текущее количество занятых обычных мест", default=0
+        "Текущее общее количество занятых мест", default=0
     )
 
     class Meta:
@@ -109,16 +86,40 @@ class AttendanceType(models.Model):
         return f'({self.id}) {self.name}'
 
 
+class Coach(NameModel):
+    class Meta:
+        verbose_name = "Тренеры"
+        verbose_name_plural = "Тренер"
+
+    club = models.ForeignKey(
+        Club, related_name="coaches", on_delete=models.CASCADE, verbose_name="Клуб"
+    )
+    image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
+
+    def __str__(self):
+        return self.full_name
+
+
 class Course(FreePlacesMixin, TimestampModel):
     class Meta:
         verbose_name = "Курсы"
         verbose_name_plural = "Курс"
 
-    grade = models.ForeignKey(
-        Grade,
-        verbose_name="Занятие",
+    club = models.ForeignKey(
+        Club,
+        related_name="courses",
+        verbose_name="Клуб",
         on_delete=models.CASCADE,
-        related_name="courses"
+        null=True,
+        blank=False
+    )
+    grade_type = models.ForeignKey(
+        GradeType,
+        related_name='courses',
+        verbose_name='Вид занятия',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=False
     )
     name = models.CharField("Название", max_length=120)
     description = models.TextField("Описание", null=True)
@@ -168,26 +169,14 @@ class Course(FreePlacesMixin, TimestampModel):
         related_name='courses',
         null=True
     )
+    coaches = models.ManyToManyField(
+        Coach,
+        related_name='courses',
+        verbose_name='Тренера'
+    )
 
     def __str__(self):
         return f'({self.id}) {self.name}'
-
-
-class Coach(NameModel):
-    class Meta:
-        verbose_name = "Тренеры"
-        verbose_name_plural = "Тренер"
-
-    club = models.ForeignKey(
-        Club, related_name="coaches", on_delete=models.CASCADE, verbose_name="Клуб"
-    )
-    course = models.ForeignKey(
-        Course, related_name="coaches", on_delete=models.CASCADE, verbose_name="Курс"
-    )
-    image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
-
-    def __str__(self):
-        return self.full_name
 
 
 class LessonDay(models.Model):
@@ -219,7 +208,7 @@ class LessonDay(models.Model):
     end_time = models.TimeField("Время окончания")
 
     def __str__(self):
-        return f'({self.id}) {self.course.grade.club.name}, {self.course.name}: {general.get_value_from_choices(constants.WEEKDAYS, self.weekday)}, {self.start_time}-{self.end_time}'
+        return f'({self.id}) {self.course.name}: {general.get_value_from_choices(constants.WEEKDAYS, self.weekday)}, {self.start_time}-{self.end_time}'
 
 
 class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
@@ -255,25 +244,6 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
         blank=True
     )
 
-    unipass_users = models.ManyToManyField(
-        User,
-        related_name='unipass_lessons',
-        verbose_name='Пользователи UniPass',
-        blank=True
-    )
-    uniclass_users = models.ManyToManyField(
-        User,
-        related_name='uniclass_lessons',
-        verbose_name='Пользователи UniClass',
-        blank=True
-    )
-    regular_users = models.ManyToManyField(
-        User,
-        related_name='regular_lessons',
-        verbose_name='Пользователи абонимент',
-        blank=True
-    )
-
     coach = models.ForeignKey(
         Coach,
         on_delete=models.CASCADE,
@@ -295,25 +265,21 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
         delta = timedelta(days=1)
 
         lesson_days = {
-            weekday: [{
+            lesson_day.weekday: {
                 "start_time": lesson_day.start_time,
                 "end_time": lesson_day.end_time
-            } for lesson_day in course.lesson_days.filter(weekday=weekday)]
-            for weekday in range(0, 7)
+            }
+            for lesson_day in cast(Iterable[LessonDay], course.lesson_days.all())
         }
 
         while start_date <= end_date:
             weekday = start_date.weekday()
-
-            for lesson_day in lesson_days[weekday]:
+            if weekday in lesson_days.keys():
                 new_lesson = cls(
                     course=course,
                     day=start_date,
-                    start_time=lesson_day["start_time"],
-                    end_time=lesson_day["end_time"],
-                    unipass_places=course.unipass_places,
-                    uniclass_places=course.uniclass_places,
-                    regular_places=course.regular_places,
+                    start_time=lesson_days[weekday]["start_time"],
+                    end_time=lesson_days[weekday]["end_time"]
                 )
                 new_lesson.save()
             start_date += delta
@@ -321,35 +287,6 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     def __str__(self):
         return f"Занитие по курсу {self.course.name} " \
                f"({self.day} с {self.start_time} по {self.end_time})"
-
-
-class LessonUserStatus(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='lesson_statuses',
-        verbose_name='Пользователь',
-    )
-    lesson = models.ForeignKey(
-        Lesson,
-        on_delete=models.CASCADE,
-        verbose_name='Занятие',
-        related_name='lesson_statuses'
-    )
-    status = models.PositiveSmallIntegerField(
-        'Статус',
-        choices=constants.LESSON_STATUSES,
-        default=None,
-        null=True,
-        blank=False
-    )
-
-    class Meta:
-        verbose_name = 'Статус занятия с ребенком'
-        verbose_name_plural = 'Статусы занятий с детьми'
-
-    def __str__(self):
-        return f'({self.id}) {self.user}, {self.lesson.course.name}'
 
 
 class CourseReview(ReviewMixin):

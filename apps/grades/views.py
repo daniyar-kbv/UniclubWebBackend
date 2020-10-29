@@ -13,14 +13,15 @@ from rest_framework.permissions import IsAuthenticated
 
 from apps.users.views import PartnerAPIMixin
 from apps.users.permissions import IsClient
+from apps.subscriptions.models import LessonBooking
 from apps.core.views import PublicAPIMixin
 from apps.utils import distance
 
-from .models import Grade, Course, Lesson, GradeType, CourseReview, LessonUserStatus
+from .models import Course, Lesson, GradeType, CourseReview
 from .serializers import (
-    GradeSerializer, CourseSerializer, LessonSerializer, GradeTypeListSerializer, LessonRetrieveSerializer,
+    CourseSerializer, LessonSerializer, GradeTypeListSerializer, LessonRetrieveSerializer,
     CourseReviewCreateSerializer, CourseReviewSerializer, CourseReviewHelpedSerializer,
-    LessonUserStatusCreateSerializer
+    LessonBookingCreateSerializer
 )
 from .filters import CoursesFilterBackend
 
@@ -34,36 +35,13 @@ class GradeTypesViewSet(PublicAPIMixin,
     serializer_class = GradeTypeListSerializer
 
 
-class GradeViewSet(PartnerAPIMixin, ModelViewSet):
-    queryset = Grade.objects.all()
-    serializer_class = GradeSerializer
-
-    def get_queryset(self):
-        return Grade.objects.filter(club=self.get_club())
-
-    def perform_create(self, serializer):
-        serializer.save(club=self.get_club())
-
-
 class CourseViewSet(PartnerAPIMixin, ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
-    def get_grade(self):
-        return get_object_or_404(
-            Grade, pk=self.kwargs.get("grade_pk"), club=self.get_club()
-        )
-
-    def get_queryset(self):
-        return Course.objects.filter(grade=self.get_grade())
-
     def perform_create(self, serializer):
-        serializer.save(grade=self.get_grade())
-
-
-class CourseListViewSet(PublicAPIMixin, ListModelMixin, GenericViewSet):
-    queryset = Course.objects.all()
-    serializer_class = CourseSerializer
+        instance = self.get_club()
+        course = serializer.save(club=instance)
 
 
 class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -79,16 +57,16 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericV
         elif self.action == 'leave_review':
             return CourseReviewCreateSerializer
         elif self.action == 'set_status':
-            return LessonUserStatusCreateSerializer
+            return LessonBookingCreateSerializer
         return LessonSerializer
 
     def filter_queryset(self, queryset):
         if self.request.query_params.get('city'):
-            queryset = queryset.filter(course__grade__club__city=self.request.query_params.get('city'))
+            queryset = queryset.filter(course__club__city=self.request.query_params.get('city'))
         if self.request.query_params.get('grade_type'):
-            queryset = queryset.filter(course__grade__grade_type=self.request.query_params.get('grade_type'))
+            queryset = queryset.filter(course__grade_type=self.request.query_params.get('grade_type'))
         if self.request.query_params.get('club'):
-            queryset = queryset.filter(course__grade__club__id=self.request.query_params.get('club'))
+            queryset = queryset.filter(course__club__id=self.request.query_params.get('club'))
         if self.request.query_params.get('age') and self.request.user is not AnonymousUser:
             queryset = queryset.filter(
                 Q(course__from_age__lte=self.request.query_params.get('age')) &
@@ -104,7 +82,7 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericV
                 lon1 = float(self.request.query_params.get('longitude'))
                 dis = int(self.request.query_params.get('distance'))
                 for item in queryset:
-                    if distance.calculate(lat1, lon1, item.course.grade.club.latitude, item.course.grade.club.longitude) > dis:
+                    if distance.calculate(lat1, lon1, item.course.club.latitude, item.course.club.longitude) > dis:
                         queryset = queryset.exclude(id=item.id)
             except:
                 pass
@@ -161,11 +139,11 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericV
         if instance.day < datetime.date.today() or (instance.day == datetime.date.today() and instance.end_time < datetime.datetime.now().time()):
             return Response('Это занятие уже прошло', status.HTTP_400_BAD_REQUEST)
         try:
-            LessonUserStatus.objects.get(lesson=instance, user=request.user)
+            LessonBooking.objects.get(lesson=instance, user=request.user)
             return Response('У этого занятия уже существует статус', status.HTTP_400_BAD_REQUEST)
         except:
             pass
-        serializer = LessonUserStatusCreateSerializer(data=request.data)
+        serializer = LessonBookingCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, lesson=instance)
         return Response(serializer.data)

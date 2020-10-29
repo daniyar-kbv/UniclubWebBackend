@@ -1,6 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.decorators import action
 
 from apps.users.views import ClientAPIMixin
 
@@ -12,9 +15,13 @@ from .serializers import (
 )
 
 
-class SubscribeView(ClientAPIMixin, CreateAPIView):
+class SubscribeViewSet(ClientAPIMixin,
+                       GenericViewSet,
+                       CreateModelMixin):
     queryset = Subscription.objects.all()
-    serializer_class = SubscriptionCreateSerializer
+
+    def get_serializer_class(self):
+        return SubscriptionCreateSerializer
 
 
 class FreezeRequestView(ClientAPIMixin, APIView):

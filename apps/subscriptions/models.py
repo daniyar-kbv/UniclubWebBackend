@@ -6,10 +6,14 @@ from django.contrib.auth import get_user_model
 from apps.core.models import TimestampModel
 from apps.person.models import ClientChildren
 from apps.products.models import Product
+from apps.grades.models import Course, Lesson
+from apps.clubs.models import Club
 
 from . import (
-    SubscriptionOperations, FreezeRequestDesicion, SubscriptionStatuses
+    SubscriptionOperations, FreezeRequestDesicion, SubscriptionStatuses, FreezeDuration
 )
+
+import constants
 
 User = get_user_model()
 
@@ -46,6 +50,22 @@ class Subscription(TimestampModel):
         max_length=20,
         choices=SubscriptionStatuses.choices,
         default=SubscriptionStatuses.ACTIVE
+    )
+    club = models.ForeignKey(
+        Club,
+        on_delete=models.PROTECT,
+        related_name='subscriptions',
+        verbose_name='Клуб',
+        null=True,
+        blank=True
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.PROTECT,
+        related_name='subscriptions',
+        verbose_name='Курс',
+        null=True,
+        blank=True
     )
 
     start_date = models.DateField("Начало подписки")
@@ -90,9 +110,51 @@ class FreezeRequest(TimestampModel):
         related_name="freeze_requests",
         verbose_name="Покупатель"
     )
+    duration = models.CharField(
+        'Время',
+        choices=FreezeDuration.choices,
+        default=FreezeDuration.THREE_DAYS,
+        max_length=25
+    )
     desicion = models.CharField(
         "Решение",
         choices=FreezeRequestDesicion.choices,
         default=FreezeRequestDesicion.NOT_PROCESSED,
         max_length=25
     )
+
+
+class LessonBooking(models.Model):
+    user = models.ForeignKey(
+        ClientChildren,
+        on_delete=models.CASCADE,
+        related_name='lesson_statuses',
+        verbose_name='Пользователь',
+    )
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        verbose_name='Занятие',
+        related_name='bookings'
+    )
+    subscription = models.ForeignKey(
+        Subscription,
+        verbose_name="Подписка",
+        on_delete=models.CASCADE,
+        related_name='bookings',
+    )
+    status = models.PositiveSmallIntegerField(
+        'Статус',
+        choices=constants.LESSON_STATUSES,
+        default=None,
+        null=True,
+        blank=False
+    )
+
+    class Meta:
+        verbose_name = 'Статус занятия с ребенком'
+        verbose_name_plural = 'Статусы занятий с детьми'
+
+    def __str__(self):
+        return f'({self.id}) {self.user}, {self.lesson.course.name}'
+

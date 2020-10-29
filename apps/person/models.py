@@ -61,4 +61,4 @@ class ClientChildren(NameModel, AdditionalInformationMixin):
     )
 
     def __str__(self):
-        return self.full_name
+        return f'({self.id}) {self.full_name}'

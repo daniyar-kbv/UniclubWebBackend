@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Grade, Course, GradeType, Lesson, CourseReview, GradeTypeGroup, AttendanceType, LessonDay
+from .models import Course, GradeType, Lesson, CourseReview, GradeTypeGroup, AttendanceType, LessonDay
 
 
 class GradeTypeAdmin(admin.ModelAdmin):
@@ -7,13 +7,6 @@ class GradeTypeAdmin(admin.ModelAdmin):
 
 
 admin.site.register(GradeType, GradeTypeAdmin)
-
-
-class GradeAdmin(admin.ModelAdmin):
-    pass
-
-
-admin.site.register(Grade, GradeAdmin)
 
 
 class LessonDayInline(admin.StackedInline):
@@ -29,7 +22,7 @@ admin.site.register(Course, CourceAdmin)
 
 
 class LessonAdmin(admin.ModelAdmin):
-    filter_horizontal = ['unipass_users', 'uniclass_users', 'regular_users']
+    pass
 
 
 admin.site.register(Lesson, LessonAdmin)

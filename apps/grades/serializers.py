@@ -3,17 +3,18 @@ from rest_framework import serializers
 
 from apps.clubs.models import Club, ClubReview, ClubImage
 from apps.users.serializers import UserShortSerializer
+from apps.subscriptions.models import LessonBooking
+from apps.products import ProductType
 from apps.utils import general
-from .models import Grade, Course, LessonDay, Lesson, GradeType, CourseReview, GradeTypeGroup, AttendanceType, \
-    LessonUserStatus, Coach
+from .models import Course, LessonDay, Lesson, GradeType, CourseReview, GradeTypeGroup, AttendanceType, Coach
 
-import constants
+import constants, datetime
 
 
 class CoachClubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coach
-        exclude = ['club', 'course']
+        exclude = ['club']
 
 
 class ClubReviewSerializer(serializers.ModelSerializer):
@@ -96,6 +97,12 @@ class CourseRetrieveSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CourseShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'name']
+
+
 class LessonSerializer(serializers.ModelSerializer):
     duration = serializers.SerializerMethodField()
     course_name = serializers.SerializerMethodField()
@@ -117,10 +124,10 @@ class LessonSerializer(serializers.ModelSerializer):
         return obj.course.name
 
     def get_club_name(self, obj):
-        return obj.course.grade.club.name
+        return obj.course.club.name
 
     def get_address(self, obj):
-        return obj.course.grade.club.address
+        return obj.course.club.address
 
     def get_is_favorite(self, obj):
         if not self.context.get('user'):
@@ -168,7 +175,7 @@ class LessonRetrieveSerializer(LessonSerializer):
         return review
 
     def get_club(self, obj):
-        serializer = ClubRetrieveSerializer(obj.course.grade.club)
+        serializer = ClubRetrieveSerializer(obj.course.club)
         return serializer.data
 
     def get_course(self, obj):
@@ -176,17 +183,14 @@ class LessonRetrieveSerializer(LessonSerializer):
         return serializer.data
 
 
-class GradeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Grade
-        exclude = "club",
+class LessonClubScheduleSerializer(serializers.ModelSerializer):
+    coach = CoachClubSerializer()
+    course = CourseShortSerializer()
 
-    def validate(self, data):
-        if data.get('from_age') < 1 or data.get('from_age') > 18 or data.get('to_age') < 1 or data.get('to_age') > 18:
-            raise serializers.ValidationError("Диапозон возраста: 1 - 18")
-        if data.get('from_age') > data.get('to_age'):
-            raise serializers.ValidationError("Возраст от должен быть меньше чем возраст до")
-        return data
+    class Meta:
+        model = Lesson
+        fields = ['id', 'start_time', 'end_time', 'course', 'coach', 'unipass_places', 'uniclass_places',
+                  'regular_places', 'unipass_clients', 'uniclass_clients', 'regular_clients']
 
 
 class LessonDaySerializer(serializers.ModelSerializer):
@@ -200,7 +204,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        exclude = "grade",
+        exclude = ('club', 'grade_type')
 
     @transaction.atomic
     def create(self, validated_data):
@@ -264,13 +268,13 @@ class LessonScheduleSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         try:
-            status = LessonUserStatus.objects.get(lesson=obj, user=self.context.get('user'))
+            status = LessonBooking.objects.get(lesson=obj, user=self.context.get('user'))
             return general.get_value_from_choices(constants.LESSON_STATUSES, status)
         except:
             return None
 
 
-class LessonUserStatusCreateSerializer(serializers.ModelSerializer):
+class LessonBookingCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LessonUserStatus
+        model = LessonBooking
         fields = ['status']

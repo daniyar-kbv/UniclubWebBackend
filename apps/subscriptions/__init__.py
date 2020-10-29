@@ -14,6 +14,12 @@ class FreezeRequestDesicion(TextChoices):
     REJECTED = "REJECTED", "Отклонен"
 
 
+class FreezeDuration(TextChoices):
+    THREE_DAYS = 'THREE_DAYS', 'На 3 дня'
+    ONE_WEEK = 'ONE_WEEK', 'На неделю'
+    TWO_WEEKS = 'TWO_WEEKS', 'На 2 недели'
+
+
 class SubscriptionStatuses(TextChoices):
     ACTIVE = "ACTIVE", "Активна"
     FROZEN = "FROZEN", "Заморожена"

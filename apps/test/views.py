@@ -1,14 +1,17 @@
+from django.db.models import Count, Q
+
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework import status
 
 from apps.users.models import User
 from apps.core.views import PublicAPIMixin
-from apps.grades.models import Grade, Course, CourseReview, Coach
+from apps.grades.models import Course, CourseReview, Coach
 from apps.clubs.models import ClubReview
 
-from .serializers import ClientCreateSerializer, PartnerCreateSerializer, CoachCreateSerializer, GradeCreateSerializer, \
+from .serializers import ClientCreateSerializer, PartnerCreateSerializer, CoachCreateSerializer, \
     CourseCreateSerializer, ClubReviewCreateSerializerTest, CourseReviewCreateSerializerTest
 
 
@@ -44,13 +47,6 @@ class CoachViewSet(GenericViewSet,
     permission_classes = []
 
 
-class GradeViewSet(GenericViewSet,
-                   CreateModelMixin):
-    queryset = Grade.objects.all()
-    serializer_class = GradeCreateSerializer
-    permission_classes = []
-
-
 class CourseViewSet(GenericViewSet,
                     CreateModelMixin):
     queryset = Course.objects.all()
@@ -70,3 +66,10 @@ class CourseReviewViewSet(GenericViewSet,
     queryset = CourseReview.objects.all()
     serializer_class = CourseReviewCreateSerializerTest
     permission_classes = []
+
+
+class TestView(PublicAPIMixin, APIView):
+    def get(self, request, *args, **kwargs):
+        # courses = Course.objects.all().annotate(attended=Count('lessons__bookings', filter=Q(lessons__bookings__user=)))
+        # return Response(courses.first().attended)
+        pass

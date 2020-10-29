@@ -2,7 +2,7 @@ from rest_framework import serializers
 from apps.users.models import User
 from apps.person.models import ClientProfile
 from apps.clubs.models import Club, ClubReview, ClubImage
-from apps.grades.models import Grade, Course, LessonDay, Lesson, CourseReview, Coach
+from apps.grades.models import Course, LessonDay, Lesson, CourseReview, Coach
 
 
 class ClientProfileCreateSerializer(serializers.ModelSerializer):
@@ -81,12 +81,6 @@ class CoachCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         coach = Coach.objects.create(**validated_data, club=validated_data.get('course').grade.club)
         return coach
-
-
-class GradeCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Grade
-        fields = '__all__'
 
 
 class LessonDayCreateSerializer(serializers.ModelSerializer):
