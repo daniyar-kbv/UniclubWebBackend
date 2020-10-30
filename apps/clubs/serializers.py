@@ -1,10 +1,13 @@
 from django.contrib.auth.models import AnonymousUser
+from django.db.models import Q
 from rest_framework import serializers
 
 from .models import Club, ClubImage, ClubReview
 from apps.users.serializers import UserShortSerializer
 from apps.grades.serializers import GradeTypeListSerializer, CoachClubSerializer
-from apps.grades.models import GradeType
+from apps.grades.models import GradeType, Coach, Lesson
+
+import constants
 
 
 class ClubReviewSerializer(serializers.ModelSerializer):
@@ -124,9 +127,23 @@ class ClubForFilterSerializer(serializers.ModelSerializer):
 
 
 class ClubUpdateSerializer(serializers.ModelSerializer):
+    coaches = CoachClubSerializer(many=True, read_only=True)
+
     class Meta:
         model = Club
-        exclude = "club_admin",
+        fields = '__all__'
+        extra_fields = ['coaches']
+        remove_fields = ['club_admin']
+
+    def get_field_names(self, declared_fields, info):
+        expanded_fields = super(ClubUpdateSerializer, self).get_field_names(declared_fields, info)
+
+        if getattr(self.Meta, 'extra_fields', None):
+            expanded_fields += self.Meta.extra_fields
+        if getattr(self.Meta, 'remove_fields', None):
+            for field in self.Meta.remove_fields:
+                expanded_fields.remove(field)
+        return expanded_fields
 
     def validate(self, data):
         if data.get('from_age') < 1 or data.get('from_age') > 18 or data.get('to_age') < 1 or data.get('to_age') > 18:
@@ -159,3 +176,50 @@ class ReviewHelpedSerializer(serializers.ModelSerializer):
                 instance.helped.remove(user)
         instance.save()
         return instance
+
+
+class ClubLessonScheduleSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lesson
+        fields = ['id', 'name', 'start_time', 'end_time', 'unipass_clients', 'uniclass_clients', 'regular_clients',
+                  'unipass_places', 'uniclass_places', 'regular_places']
+
+    def get_name(self, obj):
+        return obj.course.name
+
+
+class ClubScheduleSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        club = self.context.get('club')
+        lessons = Lesson.objects.filter(
+            Q(course__club=club) & Q(day=instance)
+        ).order_by('start_time')
+        lessons_serializer = ClubLessonScheduleSerializer(lessons, many=True, context=self.context)
+        return {
+            'date': instance.strftime(constants.DATE_FORMAT),
+            'weekday': instance.weekday(),
+            'lessons': lessons_serializer.data
+        }
+
+
+class ClubScheduleCoachSerializer(serializers.ModelSerializer):
+    grade_type = serializers.SerializerMethodField()
+    lessons = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Coach
+        fields = ['id', 'first_name', 'last_name', 'middle_name', 'grade_type', 'lessons']
+
+    def get_grade_type(self, obj):
+        return obj.grade_type.name if obj.grade_type else None
+
+    def get_lessons(self, obj):
+        club = self.context.get('club')
+        date = self.context.get('date')
+        lessons = Lesson.objects.filter(
+            Q(course__club=club) & Q(day=date)
+        ).order_by('start_time')
+        lessons_serializer = ClubLessonScheduleSerializer(lessons, many=True, context=self.context)
+        return lessons_serializer.data

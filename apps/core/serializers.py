@@ -10,3 +10,7 @@ class CitySerializer(serializers.ModelSerializer):
             "id",
             "name"
         )
+
+
+class EmptySerializer(serializers.BaseSerializer):
+    pass

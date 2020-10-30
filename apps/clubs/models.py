@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import models
 from django.contrib.auth import get_user_model
 
-from apps.core.models import CityModel, TimestampModel, ReviewMixin
+from apps.core.models import CityModel, TimestampModel, ReviewMixin, GradeType
 
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -109,6 +109,12 @@ class AdditionalInformation(models.Model):
     )
     is_new = models.BooleanField(
         'Новый', null=False, blank=True, default=True
+    )
+    grade_types = models.ManyToManyField(
+        GradeType,
+        related_name='clubs',
+        verbose_name='Виды занятий',
+        blank=True
     )
 
     class Meta:

@@ -6,7 +6,7 @@ from .models import (
     ClientProfile, ClientChildren
 )
 from apps.grades.models import Coach, Lesson
-from apps.grades.serializers import LessonScheduleSerializer
+from apps.grades.serializers import BookingScheduleSerializer
 from apps.subscriptions.models import LessonBooking
 
 import constants, datetime
@@ -67,13 +67,11 @@ class ClientChildrenSerializer(serializers.ModelSerializer):
 class ScheduleSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         child = self.context.get('child')
-        lessons = Lesson.objects.filter(
-            Q(bookings__user=child) & Q(day=instance)
-        ).order_by('start_time')
-        lessons_serializer = LessonScheduleSerializer(lessons, many=True, context=self.context)
+        bookings = LessonBooking.objects.filter(user=child, lesson__day=instance).order_by('lesson__start_time')
+        bookings_serializer = BookingScheduleSerializer(bookings, many=True, context=self.context)
         return {
             'date': instance.strftime(constants.DATE_FORMAT),
             'weekday': instance.weekday(),
-            'lessons': lessons_serializer.data
+            'bookings': bookings_serializer.data
         }
 

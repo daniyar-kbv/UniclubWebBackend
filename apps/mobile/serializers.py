@@ -1,9 +1,10 @@
 from rest_framework import serializers
 
 from apps.website.models import BookingApplication
-from apps.grades.models import Lesson, Course, GradeTypeGroup, AttendanceType, LessonDay
+from apps.grades.models import Lesson, Course, AttendanceType, LessonDay
 from apps.grades.serializers import GradeTypeGroupWithTypesSerializer, AttendanceTypeSerializer, LessonDaySerializer
 from apps.clubs.models import ClubImage
+from apps.core.models import GradeTypeGroup
 from .models import AgeGroup
 
 

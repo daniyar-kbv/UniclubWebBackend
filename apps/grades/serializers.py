@@ -2,11 +2,12 @@ from django.db import transaction
 from rest_framework import serializers
 
 from apps.clubs.models import Club, ClubReview, ClubImage
+from apps.core.models import GradeTypeGroup
 from apps.users.serializers import UserShortSerializer
 from apps.subscriptions.models import LessonBooking
 from apps.products import ProductType
 from apps.utils import general
-from .models import Course, LessonDay, Lesson, GradeType, CourseReview, GradeTypeGroup, AttendanceType, Coach
+from .models import Course, LessonDay, Lesson, GradeType, CourseReview, AttendanceType, Coach
 
 import constants, datetime
 
@@ -257,19 +258,26 @@ class AttendanceTypeSerializer(serializers.ModelSerializer):
 
 class LessonScheduleSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
-    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = ['id', 'name', 'start_time', 'end_time', 'status']
+        fields = ['id', 'name', 'start_time', 'end_time']
 
     def get_name(self, obj):
         return obj.course.name
 
+
+class BookingScheduleSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+    lesson = LessonScheduleSerializer()
+
+    class Meta:
+        model = LessonBooking
+        fields = ['id', 'status', 'lesson']
+
     def get_status(self, obj):
         try:
-            status = LessonBooking.objects.get(lesson=obj, user=self.context.get('user'))
-            return general.get_value_from_choices(constants.LESSON_STATUSES, status)
+            return general.get_value_from_choices(constants.LESSON_STATUSES, obj.status)
         except:
             return None
 

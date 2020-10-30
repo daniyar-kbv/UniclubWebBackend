@@ -6,7 +6,8 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from rest_framework.response import Response
 
 from apps.website.models import BookingApplication
-from apps.grades.models import Lesson, GradeTypeGroup, AttendanceType, Course
+from apps.core.models import GradeTypeGroup
+from apps.grades.models import Lesson, AttendanceType, Course
 from apps.grades.serializers import GradeTypeGroupWithTypesSerializer, AttendanceTypeSerializer
 from .serializers import BookingApplicationCreateSerializer, CourseListSerializer, AgeGroupSerializer, \
     FiltersSerializer, CourseRetrieveMobileSerializer

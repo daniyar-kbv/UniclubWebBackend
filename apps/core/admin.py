@@ -1,6 +1,18 @@
 from django.contrib import admin
 
-from .models import CityModel
+from nested_inline.admin import NestedStackedInline, NestedModelAdmin
+
+from .models import CityModel, GradeTypeGroup, GradeType
+
+
+class GradeTypeInline(NestedStackedInline):
+    model = GradeType
+    extra = 0
+
+
+@admin.register(GradeTypeGroup)
+class GradeTypeGroupAdmin(NestedModelAdmin):
+    inlines = [GradeTypeInline]
 
 
 class HiddenAdmin(admin.ModelAdmin):

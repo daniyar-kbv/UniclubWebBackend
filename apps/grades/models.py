@@ -5,7 +5,7 @@ from django.db import models, transaction
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from apps.core.models import TimestampModel, ReviewMixin, NameModel
+from apps.core.models import TimestampModel, ReviewMixin, NameModel, GradeType
 from apps.clubs.models import Club
 from apps.users.models import User
 from apps.person.models import ClientChildren
@@ -14,35 +14,6 @@ from apps.utils import general
 from . import Levels, Intensities, Durations
 
 import constants
-
-
-class GradeTypeGroup(models.Model):
-    name = models.CharField('Название', max_length=100)
-
-    class Meta:
-        verbose_name = 'Группа занятий'
-        verbose_name_plural = 'Группы занятий'
-
-    def __str__(self):
-        return f'({self.id}) {self.name}'
-
-
-class GradeType(models.Model):
-    class Meta:
-        verbose_name = "Вид занятия"
-        verbose_name_plural = "Виды занятий"
-
-    name = models.CharField("Название", max_length=120)
-    group = models.ForeignKey(
-        GradeTypeGroup,
-        verbose_name='Группа занятий',
-        related_name='types',
-        on_delete=models.CASCADE,
-        null=True
-    )
-
-    def __str__(self):
-        return f'({self.id}) {self.name}'
 
 
 class FreePlacesMixin(models.Model):
@@ -95,6 +66,14 @@ class Coach(NameModel):
         Club, related_name="coaches", on_delete=models.CASCADE, verbose_name="Клуб"
     )
     image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
+    grade_type = models.ForeignKey(
+        GradeType,
+        on_delete=models.PROTECT,
+        related_name='coaches',
+        verbose_name='Вид занятий',
+        null=True,
+        blank=False
+    )
 
     def __str__(self):
         return self.full_name
@@ -117,7 +96,7 @@ class Course(FreePlacesMixin, TimestampModel):
         GradeType,
         related_name='courses',
         verbose_name='Вид занятия',
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         null=True,
         blank=False
     )
@@ -285,7 +264,7 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
             start_date += delta
 
     def __str__(self):
-        return f"Занитие по курсу {self.course.name} " \
+        return f"({self.id}) Занитие по курсу {self.course.name} " \
                f"({self.day} с {self.start_time} по {self.end_time})"
 
 

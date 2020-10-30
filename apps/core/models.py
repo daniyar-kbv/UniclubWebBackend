@@ -52,3 +52,32 @@ class ReviewMixin(TimestampModel):
 
     class Meta:
         abstract = True
+
+
+class GradeTypeGroup(models.Model):
+    name = models.CharField('Название', max_length=100)
+
+    class Meta:
+        verbose_name = 'Группа занятий'
+        verbose_name_plural = 'Группы занятий'
+
+    def __str__(self):
+        return f'({self.id}) {self.name}'
+
+
+class GradeType(models.Model):
+    class Meta:
+        verbose_name = "Вид занятия"
+        verbose_name_plural = "Виды занятий"
+
+    name = models.CharField("Название", max_length=120)
+    group = models.ForeignKey(
+        GradeTypeGroup,
+        verbose_name='Группа занятий',
+        related_name='types',
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    def __str__(self):
+        return f'({self.id}) {self.name}'

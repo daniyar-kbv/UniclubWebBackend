@@ -29,6 +29,8 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "corsheaders",
     "phonenumber_field",
+    'nested_inline',
+    'admin_reorder',
 ]
 
 LOCAL_APPS = [
@@ -57,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'admin_reorder.middleware.ModelAdminReorder',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -220,3 +223,37 @@ KAZINFO_PASSWORD = os.environ.get('KAZ_INFO_PASSWORD')
 # OTP settings
 OTP_LENGTH = 4
 OTP_VALIDITY_PERIOD = 120  # in minutes
+
+ADMIN_REORDER = (
+    {
+        'app': 'users',
+        'label': 'Пользователи',
+        'models': [
+            'users.User',
+            'person.ClientProfile'
+        ]
+    },
+    {
+        'app': 'core',
+        'label': 'Основное',
+        'models': [
+            'core.GradeTypeGroup',
+            'mobile.AgeGroup',
+            'grades.AttendanceType'
+        ]
+    },
+    {
+        'app': 'clubs',
+        'label': 'Клубы',
+        'models': [
+            'clubs.Club'
+        ]
+    },
+    {
+        'app': 'grades',
+        'label': 'Занятия',
+        'models': [
+            'grades.Course'
+        ]
+    }
+)

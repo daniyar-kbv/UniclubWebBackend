@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 
 from apps.core.views import PublicAPIMixin
+from apps.core.serializers import EmptySerializer
 from apps.users.views import PartnerAPIMixin
 from apps.users.permissions import IsPartner
 from apps.grades.serializers import LessonClubScheduleSerializer
@@ -24,10 +25,14 @@ from .serializers import (
     ClubReviewCreateSerializer,
     ClubReviewSerializer,
     ReviewHelpedSerializer,
+    ClubScheduleSerializer,
+    ClubScheduleCoachSerializer
 )
-from .filters import ClubsFilterBackend, ClubScheduleFilterBackend
+from .filters import ClubsFilterBackend, ClubScheduleFilterBackend, ClubCalendarFilterBackend, \
+    ClubScheduleWeekFilterBackend
+from dateutil.relativedelta import relativedelta
 
-import datetime, constants
+import datetime, constants, calendar
 
 
 class ClubViewSet(
@@ -47,6 +52,8 @@ class ClubViewSet(
             return ClubUpdateSerializer
         elif self.action == 'schedule_main':
             return LessonClubScheduleSerializer
+        elif self.action == 'calendar':
+            return EmptySerializer
         return ClubListSerializer
 
     def filter_queryset(self, queryset):
@@ -135,12 +142,108 @@ class ClubViewSet(
             permission_classes=[IsPartner])
     def schedule_main(self, request, pk=None):
         instance = self.request.user.club
-        date = datetime.datetime.strptime(self.request.query_params.get('date'), constants.DATE_FORMAT) \
-            if self.request.query_params.get('date') \
-            else datetime.date.today()
+        try:
+            date = datetime.datetime.strptime(self.request.query_params.get('date'), constants.DATE_FORMAT) \
+                if self.request.query_params.get('date') \
+                else datetime.date.today()
+        except:
+            date = datetime.date.today()
         lessons = Lesson.objects.filter(course__club=instance, day=date).order_by('start_time')
         serializer = LessonClubScheduleSerializer(lessons, many=True)
+        return Response({
+            'date': datetime.date.today().strftime(constants.DATE_FORMAT),
+            'lessons': serializer.data
+        })
+
+    @action(detail=False,
+            methods=['get'],
+            filter_backends=[ClubCalendarFilterBackend],
+            pagination_class=None,
+            permission_classes=[IsPartner])
+    def calendar(self, request, pk=None):
+        try:
+            year = int(self.request.query_params.get('year')) \
+                if self.request.query_params.get('year') \
+                else datetime.date.today().year
+            month = int(self.request.query_params.get('month')) \
+                if self.request.query_params.get('month') \
+                else datetime.date.today().month
+        except:
+            year = datetime.date.today().year
+            month = datetime.date.today().month
+        calendar_month = calendar.monthcalendar(year=year, month=month)
+        days = []
+        for index, week in enumerate(calendar_month):
+            for index2, day in enumerate(calendar_month[index]):
+                if day != 0:
+                    days.append({
+                        'weekday': index2,
+                        'day': day
+                    })
+        return Response({
+            'year': year,
+            'month': month,
+            'days': days
+        })
+
+    @action(detail=False,
+            methods=['get'],
+            filter_backends=[ClubScheduleWeekFilterBackend],
+            pagination_class=None,
+            permission_classes=[IsPartner])
+    def schedule_week(self, request, pk=None):
+        instance = self.request.user.club
+        dt = datetime.date.today()
+        start = dt - datetime.timedelta(days=dt.weekday())
+        end = start + datetime.timedelta(days=6)
+        if self.request.query_params.get('from_date') and self.request.query_params.get('to_date'):
+            try:
+                start = datetime.datetime.strptime(
+                    self.request.query_params.get('from_date'), constants.DATE_FORMAT
+                ).date()
+            except:
+                return Response({
+                    'start_time': 'Формат времени: YYYY-MM-DD'
+                })
+            try:
+                end = datetime.datetime.strptime(
+                    self.request.query_params.get('to_date'), constants.DATE_FORMAT
+                ).date()
+            except:
+                return Response({
+                    'start_time': 'Формат времени: YYYY-MM-DD'
+                })
+        delta = (end + datetime.timedelta(days=1)) - start
+        dates = [start + datetime.timedelta(days=i) for i in range(delta.days)]
+        context = {
+            'club': instance
+        }
+        serializer = ClubScheduleSerializer(dates, many=True, context=context)
         return Response(serializer.data)
+
+    @action(detail=False,
+            methods=['get'],
+            filter_backends=[ClubScheduleFilterBackend],
+            pagination_class=None,
+            permission_classes=[IsPartner])
+    def schedule_day(self, request, pk=None):
+        instance = self.request.user.club
+        try:
+            date = datetime.datetime.strptime(self.request.query_params.get('date'), constants.DATE_FORMAT) \
+                if self.request.query_params.get('date') \
+                else datetime.date.today()
+        except:
+            date = datetime.date.today()
+        context = {
+            'club': instance,
+            'date': date
+        }
+        coaches = instance.coaches
+        serializer = ClubScheduleCoachSerializer(coaches, many=True, context=context)
+        return Response({
+            'date': date,
+            'coaches': serializer.data
+        })
 
 
 class ClubReviewViewSet(GenericViewSet):

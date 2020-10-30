@@ -148,12 +148,12 @@ class LessonBooking(models.Model):
         choices=constants.LESSON_STATUSES,
         default=None,
         null=True,
-        blank=False
+        blank=True
     )
 
     class Meta:
-        verbose_name = 'Статус занятия с ребенком'
-        verbose_name_plural = 'Статусы занятий с детьми'
+        verbose_name = 'Бронирование занятия'
+        verbose_name_plural = 'Бронирования занятий'
 
     def __str__(self):
         return f'({self.id}) {self.user}, {self.lesson.course.name}'

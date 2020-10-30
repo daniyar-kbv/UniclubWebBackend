@@ -1,5 +1,7 @@
 from django.db.models import TextChoices
 
+default_app_config = 'apps.subscriptions.apps.SubscriptionsConfig'
+
 
 class SubscriptionOperations(TextChoices):
     NEW = "NEW", "Товар куплен"

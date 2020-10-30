@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from apps.users.views import PartnerAPIMixin
+from apps.users.views import PartnerAPIMixin, ClientAPIMixin
 from apps.users.permissions import IsClient
 from apps.subscriptions.models import LessonBooking
 from apps.core.views import PublicAPIMixin
@@ -25,7 +25,7 @@ from .serializers import (
 )
 from .filters import CoursesFilterBackend
 
-import datetime
+import datetime, constants
 
 
 class GradeTypesViewSet(PublicAPIMixin,
@@ -41,7 +41,7 @@ class CourseViewSet(PartnerAPIMixin, ModelViewSet):
 
     def perform_create(self, serializer):
         instance = self.get_club()
-        course = serializer.save(club=instance)
+        serializer.save(club=instance)
 
 
 class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -165,3 +165,18 @@ class CourseReviewViewSet(GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class LessonBookingViewSet(ClientAPIMixin,
+                           GenericViewSet):
+    queryset = LessonBooking.objects.all()
+
+    def get_queryset(self):
+        return LessonBooking.objects.filter(user__in=self.get_profile().children)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def cancel(self, request, pk=None):
+        instance = self.get_object()
+        instance.status = constants.LESSON_CANCELED
+        instance.save()
+        return Response()
