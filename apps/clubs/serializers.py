@@ -4,10 +4,17 @@ from rest_framework import serializers
 
 from .models import Club, ClubImage, ClubReview
 from apps.users.serializers import UserShortSerializer
+from apps.users.models import User
 from apps.grades.serializers import GradeTypeListSerializer, CoachClubSerializer
 from apps.grades.models import GradeType, Coach, Lesson
+from apps.person.models import ClientChildren, ClientProfile
+from apps.subscriptions.models import LessonBooking, Subscription
+from apps.subscriptions import SubscriptionStatuses
+from apps.products.models import Product
 
-import constants
+from dateutil.relativedelta import relativedelta
+
+import constants, datetime
 
 
 class ClubReviewSerializer(serializers.ModelSerializer):
@@ -223,3 +230,61 @@ class ClubScheduleCoachSerializer(serializers.ModelSerializer):
         ).order_by('start_time')
         lessons_serializer = ClubLessonScheduleSerializer(lessons, many=True, context=self.context)
         return lessons_serializer.data
+
+
+class ProductClubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'product_type']
+
+
+class SubscriptionClubSerializer(serializers.ModelSerializer):
+    product = ProductClubSerializer()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Subscription
+        fields = ['id', 'product', 'visits_amount', 'status']
+
+    def get_status(self, obj):
+        if relativedelta(datetime.date.today(), obj.end_date).weeks == 0 \
+                and obj.status in [SubscriptionStatuses.ACTIVE, SubscriptionStatuses.FROZEN]:
+            return 'EXPIRES_SOON'
+        return obj.status
+
+
+class UserClubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'middle_name', 'email', 'mobile_phone']
+
+
+class ClientProfileClubSerializer(serializers.ModelSerializer):
+    user = UserClubSerializer()
+
+    class Meta:
+        model = ClientProfile
+        fields = ['id', 'image', 'user']
+
+
+class ClubClientsSerializer(serializers.ModelSerializer):
+    parent = ClientProfileClubSerializer()
+    birth_date = serializers.DateTimeField(format=constants.DATE_FORMAT)
+    visits_attended = serializers.SerializerMethodField()
+    subscription = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClientChildren
+        fields = ['id', 'first_name', 'last_name', 'middle_name', 'mobile_phone', 'email', 'birth_date', 'sex',
+                  'parent', 'visits_attended', 'subscription']
+
+    def get_visits_attended(self, obj):
+        subscription = Subscription.objects.filter(child=obj).order_by('-created_at').first()
+        return LessonBooking.objects.filter(
+            user=obj, status=constants.LESSON_ATTENDED, subscription=subscription
+        ).count()
+
+    def get_subscription(self, obj):
+        last_subscription = Subscription.objects.filter(child=obj).order_by('-created_at').first()
+        serializer = SubscriptionClubSerializer(last_subscription)
+        return serializer.data

@@ -2,6 +2,18 @@ from rest_framework.filters import BaseFilterBackend
 import coreapi, coreschema
 
 
+class ClubClientsFilterBackend(BaseFilterBackend):
+    def get_schema_fields(self, view):
+        return [
+            coreapi.Field(
+                name='type',
+                location='query',
+                required=False,
+                schema=coreschema.String()
+            )
+        ]
+
+
 class ClubCalendarFilterBackend(BaseFilterBackend):
     def get_schema_fields(self, view):
         return [

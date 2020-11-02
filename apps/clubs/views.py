@@ -15,6 +15,8 @@ from apps.users.views import PartnerAPIMixin
 from apps.users.permissions import IsPartner
 from apps.grades.serializers import LessonClubScheduleSerializer
 from apps.grades.models import Lesson
+from apps.person.models import ClientChildren
+from apps.subscriptions.models import Subscription
 
 from .models import Club, ClubReview
 from .serializers import (
@@ -26,11 +28,13 @@ from .serializers import (
     ClubReviewSerializer,
     ReviewHelpedSerializer,
     ClubScheduleSerializer,
-    ClubScheduleCoachSerializer
+    ClubScheduleCoachSerializer,
+    ClubClientsSerializer,
 )
 from .filters import ClubsFilterBackend, ClubScheduleFilterBackend, ClubCalendarFilterBackend, \
-    ClubScheduleWeekFilterBackend
+    ClubScheduleWeekFilterBackend, ClubClientsFilterBackend
 from dateutil.relativedelta import relativedelta
+from . import ClientType
 
 import datetime, constants, calendar
 
@@ -54,6 +58,8 @@ class ClubViewSet(
             return LessonClubScheduleSerializer
         elif self.action == 'calendar':
             return EmptySerializer
+        elif self.action == 'clients':
+            return ClubClientsSerializer
         return ClubListSerializer
 
     def filter_queryset(self, queryset):
@@ -244,6 +250,25 @@ class ClubViewSet(
             'date': date,
             'coaches': serializer.data
         })
+
+    @action(detail=False,
+            methods=['get'],
+            filter_backends=[ClubClientsFilterBackend],
+            pagination_class=None,
+            permission_classes=[IsPartner])
+    def clients(self, request, pk=None):
+        clients_type = self.request.query_params.get('type') \
+            if self.request.query_params.get('type') \
+            else ClientType.ALL
+        instance = self.request.user.club
+        children = ClientChildren.objects.filter(lesson_statuses__lesson__course__club=instance)
+        if clients_type != ClientType.ALL:
+            for child in children:
+                last_subscription = Subscription.objects.filter(child=child).order_by('-created_at').first()
+                if last_subscription.product.product_type != clients_type:
+                    children.exclude(id=child.id)
+        serializer = ClubClientsSerializer(children, many=True)
+        return Response(serializer.data)
 
 
 class ClubReviewViewSet(GenericViewSet):
