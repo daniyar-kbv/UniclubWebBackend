@@ -59,7 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'admin_reorder.middleware.ModelAdminReorder',
+    'admin_reorder.middleware.ModelAdminReorder',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -230,16 +230,19 @@ ADMIN_REORDER = (
         'label': 'Пользователи',
         'models': [
             'users.User',
-            'person.ClientProfile'
+            'person.ClientProfile',
         ]
     },
     {
         'app': 'core',
         'label': 'Основное',
         'models': [
+            'core.CityModel',
             'core.GradeTypeGroup',
             'mobile.AgeGroup',
-            'grades.AttendanceType'
+            'grades.AttendanceType',
+            'products.Product',
+            'website.FAQ'
         ]
     },
     {
@@ -253,7 +256,35 @@ ADMIN_REORDER = (
         'app': 'grades',
         'label': 'Занятия',
         'models': [
-            'grades.Course'
+            'grades.Course',
+            'grades.Lesson'
+        ]
+    },
+    {
+        'app': 'sms',
+        'label': 'SMS',
+        'models': [
+            'sms.SMSMessage',
+            'sms.SMSTemplate',
+            'sms.OTP'
+        ]
+    },
+    {
+        'app': 'subscriptions',
+        'label': 'Подписки',
+        'models': [
+            'subscriptions.Subscription',
+            'subscriptions.LessonBooking',
+            'subscriptions.SubscriptionHistoryRecord'
+        ]
+    },
+    {
+        'app': 'website',
+        'label': 'Заявки',
+        'models': [
+            'website.BookingApplication',
+            'website.PartnerFeedBack',
+            'website.FeedBack'
         ]
     }
 )

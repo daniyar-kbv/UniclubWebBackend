@@ -18,6 +18,8 @@ User = get_user_model()
 class SubscriptionInline(NestedStackedInline):
     model = Subscription
     extra = 0
+    readonly_fields = ['created_at', 'id']
+    autocomplete_fields = ['child']
 
 
 class ClubInline(NestedStackedInline):

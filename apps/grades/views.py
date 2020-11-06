@@ -19,9 +19,9 @@ from apps.utils import distance
 
 from .models import Course, Lesson, GradeType, CourseReview
 from .serializers import (
-    CourseSerializer, LessonSerializer, GradeTypeListSerializer, LessonRetrieveSerializer,
+    CourseCreateSerializer, LessonSerializer, GradeTypeListSerializer, LessonRetrieveSerializer,
     CourseReviewCreateSerializer, CourseReviewSerializer, CourseReviewHelpedSerializer,
-    LessonBookingCreateSerializer
+    LessonBookingCreateSerializer, CourseListSerializer, CourseRetrieveSerializer
 )
 from .filters import CoursesFilterBackend
 
@@ -37,7 +37,16 @@ class GradeTypesViewSet(PublicAPIMixin,
 
 class CourseViewSet(PartnerAPIMixin, ModelViewSet):
     queryset = Course.objects.all()
-    serializer_class = CourseSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CourseListSerializer
+        if self.action == 'retrieve':
+            return CourseRetrieveSerializer
+        return CourseCreateSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(club=self.get_club()).order_by('created_at')
 
     def perform_create(self, serializer):
         instance = self.get_club()

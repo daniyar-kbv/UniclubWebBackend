@@ -184,7 +184,10 @@ class ClubViewSet(
                 if day != 0:
                     days.append({
                         'weekday': index2,
-                        'day': day
+                        'day': day,
+                        'is_today': datetime.date.today().year == year and
+                                    datetime.date.today().month == month and
+                                    datetime.date.today().day == day
                     })
         return Response({
             'year': year,

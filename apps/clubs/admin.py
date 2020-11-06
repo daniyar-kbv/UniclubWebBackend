@@ -6,27 +6,27 @@ from apps.grades.models import Coach, Course
 from .models import Club, ClubImage, ClubReview
 
 
-class CourseInline(NestedStackedInline):
+class CourseInline(admin.StackedInline):
     model = Course
     extra = 0
 
 
-class CoachInline(NestedStackedInline):
+class CoachInline(admin.TabularInline):
     model = Coach
     extra = 0
 
 
-class ClubReviewInline(NestedStackedInline):
+class ClubReviewInline(admin.StackedInline):
     model = ClubReview
     extra = 0
 
 
-class ClubImageInline(NestedStackedInline):
+class ClubImageInline(admin.TabularInline):
     extra = 0
     model = ClubImage
 
 
-class ClubAdmin(NestedModelAdmin):
+class ClubAdmin(admin.ModelAdmin):
     inlines = [ClubImageInline, CoachInline, CourseInline, ClubReviewInline]
     readonly_fields = ['favorite_users']
 

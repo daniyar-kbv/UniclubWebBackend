@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from nested_inline.admin import NestedModelAdmin, NestedStackedInline
+from nested_inline.admin import NestedModelAdmin, NestedStackedInline, NestedTabularInline
 
 from .models import ClientProfile, ClientChildren
 from apps.grades.models import Coach
@@ -12,14 +12,14 @@ class FreezeRequestInline(NestedStackedInline):
     extra = 0
 
 
-class ChildSubscriptionInline(NestedStackedInline):
+class SubscriptionInline(NestedStackedInline):
     model = Subscription
     extra = 0
     readonly_fields = ['id']
     inlines = [FreezeRequestInline]
 
 
-class LessonBookingInline(NestedStackedInline):
+class LessonBookingInline(NestedTabularInline):
     model = LessonBooking
     extra = 0
     raw_id_fields = ['lesson']
@@ -28,7 +28,7 @@ class LessonBookingInline(NestedStackedInline):
 class ChildrenInline(NestedStackedInline):
     model = ClientChildren
     extra = 0
-    inlines = [ChildSubscriptionInline, LessonBookingInline]
+    inlines = [LessonBookingInline]
 
 
 @admin.register(ClientProfile)
@@ -43,4 +43,4 @@ class CoachProfile(admin.ModelAdmin):
 
 @admin.register(ClientChildren)
 class ClientChildrenAdmin(admin.ModelAdmin):
-    inlines = [ChildSubscriptionInline]
+    search_fields = ['first_name', 'last_name', 'middle_name', 'email', 'mobile_phone']

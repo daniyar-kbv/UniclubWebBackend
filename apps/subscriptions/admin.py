@@ -1,11 +1,24 @@
 from django.contrib import admin
 
-from .models import Subscription, FreezeRequest, LessonBooking
+from .models import Subscription, FreezeRequest, LessonBooking, SubscriptionHistoryRecord
 
-admin.site.register((FreezeRequest, Subscription))
+
+class FreezeRequestInline(admin.TabularInline):
+    model = FreezeRequest
+    extra = 0
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    inlines = [FreezeRequestInline]
 
 
 @admin.register(LessonBooking)
 class LessonBookingAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(SubscriptionHistoryRecord)
+class SubscriptionHistoryRecord(admin.ModelAdmin):
     pass
 

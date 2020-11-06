@@ -258,7 +258,8 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
                     course=course,
                     day=start_date,
                     start_time=lesson_days[weekday]["start_time"],
-                    end_time=lesson_days[weekday]["end_time"]
+                    end_time=lesson_days[weekday]["end_time"],
+                    coach=lesson_days[weekday]["coach"]
                 )
                 new_lesson.save()
             start_date += delta

@@ -3,6 +3,7 @@ from django.contrib import admin
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 
 from .models import Course, GradeType, Lesson, CourseReview, AttendanceType, LessonDay
+from apps.subscriptions.models import LessonBooking
 
 
 class GradeTypeAdmin(admin.ModelAdmin):
@@ -12,31 +13,30 @@ class GradeTypeAdmin(admin.ModelAdmin):
 admin.site.register(GradeType, GradeTypeAdmin)
 
 
-class CourseReviewInline(admin.StackedInline):
+class CourseReviewInline(admin.TabularInline):
     model = CourseReview
     extra = 0
 
 
-class LessonInline(admin.StackedInline):
-    model = Lesson
-    extra = 0
-    raw_id_fields = ['lesson_day']
-
-
-class LessonDayInline(admin.StackedInline):
+class LessonDayInline(admin.TabularInline):
     model = LessonDay
     extra = 0
 
 
 class CourceAdmin(admin.ModelAdmin):
-    inlines = [LessonDayInline, LessonInline, CourseReviewInline]
+    inlines = [LessonDayInline, CourseReviewInline]
 
 
 admin.site.register(Course, CourceAdmin)
 
 
+class LessonBookingInline(admin.TabularInline):
+    model = LessonBooking
+    extra = 0
+
+
 class LessonAdmin(admin.ModelAdmin):
-    pass
+    inlines = [LessonBookingInline]
 
 
 admin.site.register(Lesson, LessonAdmin)

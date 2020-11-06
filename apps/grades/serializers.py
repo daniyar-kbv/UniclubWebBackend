@@ -93,15 +93,23 @@ class CourseReviewCreateSerializer(serializers.ModelSerializer):
 
 
 class CourseRetrieveSerializer(serializers.ModelSerializer):
+    grade_type = serializers.SerializerMethodField()
+    coaches = CoachClubSerializer(many=True)
+
     class Meta:
         model = Course
-        fields = '__all__'
+        exclude = ['club']
+
+    def get_grade_type(self, obj):
+        if obj.grade_type:
+            return obj.grade_type.name
+        return None
 
 
 class CourseShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'from_age', 'to_age']
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -200,12 +208,18 @@ class LessonDaySerializer(serializers.ModelSerializer):
         exclude = "course",
 
 
-class CourseSerializer(serializers.ModelSerializer):
+class CourseListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'name', 'created_at', 'regular_places']
+
+
+class CourseCreateSerializer(serializers.ModelSerializer):
     lesson_days = LessonDaySerializer(many=True)
 
     class Meta:
         model = Course
-        exclude = ('club', 'grade_type')
+        exclude = ('club', )
 
     @transaction.atomic
     def create(self, validated_data):
