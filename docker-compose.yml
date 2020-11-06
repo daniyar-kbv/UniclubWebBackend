@@ -12,6 +12,8 @@ services:
       - POSTGRES_DB=uniclub
       - POSTGRES_USER=uniclub
       - POSTGRES_PASSWORD=uniclub
+    logging:
+      driver: none
 
   backend:
     build: .
@@ -46,6 +48,8 @@ services:
     command: ["celery", "flower", "--app=config.celery_app", "--persistent=True"]
     depends_on:
       - broker
+    logging:
+      driver: none
 
   broker:
     image: rabbitmq:3.8
@@ -54,6 +58,8 @@ services:
       - "5672:5672"
     depends_on:
       - db
+    logging:
+      driver: none
 
   redis:
     image: redis:6
@@ -62,6 +68,8 @@ services:
       - "6379:6379"
     depends_on:
       - broker
+    logging:
+      driver: none
 
 volumes:
   postgres_data:
