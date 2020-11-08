@@ -79,7 +79,7 @@ class CoachCreateSerializer(serializers.ModelSerializer):
         exclude = ['club']
 
     def create(self, validated_data):
-        coach = Coach.objects.create(**validated_data, club=validated_data.get('course').grade.club)
+        coach = Coach.objects.create(**validated_data, club=validated_data.get('course').club)
         return coach
 
 
