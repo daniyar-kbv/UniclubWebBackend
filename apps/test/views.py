@@ -9,6 +9,7 @@ from rest_framework import status
 from apps.users.models import User
 from apps.core.views import PublicAPIMixin
 from apps.grades.models import Course, CourseReview, Coach
+from apps.grades.serializers import CourseCreateMainSerializer
 from apps.clubs.models import ClubReview
 
 from .serializers import ClientCreateSerializer, PartnerCreateSerializer, CoachCreateSerializer, \
@@ -50,7 +51,7 @@ class CoachViewSet(GenericViewSet,
 class CourseViewSet(GenericViewSet,
                     CreateModelMixin):
     queryset = Course.objects.all()
-    serializer_class = CourseCreateSerializer
+    serializer_class = CourseCreateMainSerializer
     permission_classes = []
 
 

@@ -237,6 +237,7 @@ class CourseCreateMainSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         lesson_days = validated_data.pop("lesson_days")
         coaches = validated_data.pop("coaches")
+
         course = super().create(validated_data)
 
         course.coaches.set(coaches)
@@ -247,12 +248,12 @@ class CourseCreateMainSerializer(serializers.ModelSerializer):
                 weekday=lesson_day["weekday"],
                 start_time=lesson_day["start_time"],
                 end_time=lesson_day["end_time"],
-                coach_id=lesson_day["coach"]
+                coach=lesson_day["coach"]
             )
 
         Lesson.generate_lessons_for_course(course=course)
 
-        return
+        return course
 
 
 class CourseUpdateMainSerializer(serializers.ModelSerializer):
