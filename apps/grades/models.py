@@ -2,7 +2,7 @@ from typing import Iterable, cast, List
 from datetime import datetime, timedelta
 
 from django.db import models, transaction
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.validators import MinValueValidator, MaxValueValidator
 
@@ -237,42 +237,36 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
     @classmethod
     @transaction.atomic
     def generate_lessons_for_course(cls, course: Course):
-        # if not course.lesson_days:
-        #     raise ValueError("Course must have lesson days")
+        if not course.lesson_days:
+            raise ValueError("Course must have lesson days")
 
         start_date, end_date = (
             course.start_date, course.end_date
         )
         delta = timedelta(days=1)
 
-        lesson_days = {
-            lesson_day.weekday: {
-                "start_time": lesson_day.start_time,
-                "end_time": lesson_day.end_time,
-                "coach": lesson_day.coach
-            }
-            for lesson_day in cast(Iterable[LessonDay], LessonDay.objects.filter(course=course)
-                                                        .annotate(lessons_count=Count('lesson_days'))
-                                                        .filter(lessons_count=0))
-        }
+        Lesson.objects.filter(
+            Q(course=course) & Q(Q(day__lte=course.start_date) | Q(day__gte=course.end_date))).delete()
 
-        print(LessonDay.objects.filter(course=course)
-                                                        .annotate(lessons_count=Count('lesson_days'))
-                                                        .filter(lessons_count=0))
+        lesson_days = LessonDay.objects.filter(course=course)
 
-
-        # while start_date <= end_date:
-        #     weekday = start_date.weekday()
-        #     if weekday in lesson_days.keys():
-        #         new_lesson = cls(
-        #             course=course,
-        #             day=start_date,
-        #             start_time=lesson_days[weekday]["start_time"],
-        #             end_time=lesson_days[weekday]["end_time"],
-        #             coach=lesson_days[weekday]["coach"]
-        #         )
-        #         new_lesson.save()
-        #     start_date += delta
+        while start_date <= end_date:
+            weekday = start_date.weekday()
+            try:
+                lesson_day = lesson_days.get(weekday=weekday)
+                if not Lesson.objects.filter(lesson_day=lesson_day, day=start_date).exists():
+                    new_lesson = cls(
+                        lesson_day_id=lesson_day.id,
+                        course=course,
+                        day=start_date,
+                        start_time=lesson_day.start_time,
+                        end_time=lesson_day.end_time,
+                        coach=lesson_day.coach
+                    )
+                    new_lesson.save()
+            except:
+                pass
+            start_date += delta
 
     def __str__(self):
         return f"({self.id}) Занитие по курсу {self.course.name} " \

@@ -39,7 +39,9 @@ class LessonBookingInline(admin.TabularInline):
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     inlines = [LessonBookingInline]
+    list_display = ['id', 'course', 'day', 'start_time', 'end_time']
     list_filter = ['course']
+    ordering = ['-day', '-start_time']
 
 
 @admin.register(CourseReview)

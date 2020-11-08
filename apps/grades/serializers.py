@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import serializers
 
 from apps.clubs.models import Club, ClubReview, ClubImage
@@ -10,6 +11,12 @@ from apps.utils import general
 from .models import Course, LessonDay, Lesson, GradeType, CourseReview, AttendanceType, Coach
 
 import constants, datetime
+
+
+class AttendanceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttendanceType
+        fields = '__all__'
 
 
 class CoachClubSerializer(serializers.ModelSerializer):
@@ -191,7 +198,7 @@ class LessonClubScheduleSerializer(serializers.ModelSerializer):
 class LessonDaySerializer(serializers.ModelSerializer):
     class Meta:
         model = LessonDay
-        exclude = "course",
+        exclude = ['id', "course"]
 
 
 class LessonDayRetrieveSerializer(serializers.ModelSerializer):
@@ -206,6 +213,7 @@ class CourseRetrieveSerializer(serializers.ModelSerializer):
     grade_type = GradeTypeListSerializer()
     coaches = CoachClubSerializer(many=True)
     lesson_days = LessonDayRetrieveSerializer(many=True)
+    attendance_type = AttendanceTypeSerializer()
 
     class Meta:
         model = Course
@@ -235,7 +243,8 @@ class CourseCreateMainSerializer(serializers.ModelSerializer):
                 course=course,
                 weekday=lesson_day["weekday"],
                 start_time=lesson_day["start_time"],
-                end_time=lesson_day["end_time"]
+                end_time=lesson_day["end_time"],
+                coach_id=lesson_day["coach"]
             )
 
         Lesson.generate_lessons_for_course(course=course)
@@ -255,17 +264,45 @@ class CourseUpdateMainSerializer(serializers.ModelSerializer):
         lesson_days = validated_data.pop("lesson_days")
         course = super().update(instance, validated_data)
 
-        for lesson_day in lesson_days:
+        old_lesson_days = [lesson_day
+                           for lesson_day in lesson_days
+                           if LessonDay.objects.filter(course=instance,
+                                                       weekday=lesson_day.get('weekday')).count() == 1]
+        new_lesson_days = [lesson_day
+                           for lesson_day in lesson_days
+                           if LessonDay.objects.filter(course=instance,
+                                                       weekday=lesson_day.get('weekday')).count() != 1]
+
+        for lesson_day in LessonDay.objects.filter(course=instance):
+            count = 0
+            for lesson_day_ in old_lesson_days:
+                if lesson_day.weekday == lesson_day_.get('weekday'):
+                    count += 1
+            if count == 0:
+                lesson_day.delete()
+
+        for lesson_day in old_lesson_days:
             try:
                 old_lesson_day = LessonDay.objects.get(course=instance, weekday=lesson_day.get('weekday'))
+                old_lesson_day.start_time = lesson_day.get('start_time')
+                old_lesson_day.end_time = lesson_day.get('end_time')
+                old_lesson_day.coach_id = lesson_day.get('coach')
+                old_lesson_day.save()
+                Lesson.objects.filter(lesson_day=old_lesson_day)\
+                    .update(start_time=lesson_day.get('start_time'),
+                            end_time=lesson_day.get('end_time'),
+                            coach_id=lesson_day.get('coach'))
             except:
                 pass
-                # LessonDay.objects.create(
-                #     course=course,
-                #     weekday=lesson_day["weekday"],
-                #     start_time=lesson_day["start_time"],
-                #     end_time=lesson_day["end_time"]
-                # )
+
+        for lesson_day in new_lesson_days:
+            LessonDay.objects.create(
+                course=instance,
+                weekday=lesson_day["weekday"],
+                start_time=lesson_day["start_time"],
+                end_time=lesson_day["end_time"],
+                coach=lesson_day["coach"]
+            )
 
         Lesson.generate_lessons_for_course(course=course)
 
@@ -295,12 +332,6 @@ class CourseReviewHelpedSerializer(serializers.ModelSerializer):
                 instance.helped.remove(user)
         instance.save()
         return instance
-
-
-class AttendanceTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AttendanceType
-        fields = '__all__'
 
 
 class LessonScheduleSerializer(serializers.ModelSerializer):

@@ -5,6 +5,8 @@ from rest_framework.response import Response
 
 from .models import CityModel
 from .serializers import CitySerializer
+from apps.grades.models import AttendanceType
+from apps.grades.serializers import AttendanceTypeSerializer
 
 import constants
 
@@ -31,3 +33,8 @@ class DatesView(PublicAPIMixin, APIView):
                 'weekday': (timezone.now() + timezone.timedelta(days=i)).weekday()
             } for i in range(0, 28)]
         )
+
+
+class AttendanceTypeView(PublicAPIMixin, ListAPIView):
+    queryset = AttendanceType.objects.all()
+    serializer_class = AttendanceTypeSerializer
