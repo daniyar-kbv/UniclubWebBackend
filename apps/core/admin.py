@@ -5,13 +5,13 @@ from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 from .models import CityModel, GradeTypeGroup, GradeType
 
 
-class GradeTypeInline(NestedStackedInline):
+class GradeTypeInline(admin.StackedInline):
     model = GradeType
     extra = 0
 
 
 @admin.register(GradeTypeGroup)
-class GradeTypeGroupAdmin(NestedModelAdmin):
+class GradeTypeGroupAdmin(admin.ModelAdmin):
     inlines = [GradeTypeInline]
 
 

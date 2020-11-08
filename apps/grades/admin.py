@@ -33,13 +33,13 @@ admin.site.register(Course, CourceAdmin)
 class LessonBookingInline(admin.TabularInline):
     model = LessonBooking
     extra = 0
+    raw_id_fields = ['subscription']
 
 
+@admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     inlines = [LessonBookingInline]
-
-
-admin.site.register(Lesson, LessonAdmin)
+    list_filter = ['course']
 
 
 @admin.register(CourseReview)

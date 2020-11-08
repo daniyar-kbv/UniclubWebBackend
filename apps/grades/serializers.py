@@ -92,20 +92,6 @@ class CourseReviewCreateSerializer(serializers.ModelSerializer):
         fields = ['rating', 'advantages', 'disadvantages', 'comment']
 
 
-class CourseRetrieveSerializer(serializers.ModelSerializer):
-    grade_type = serializers.SerializerMethodField()
-    coaches = CoachClubSerializer(many=True)
-
-    class Meta:
-        model = Course
-        exclude = ['club']
-
-    def get_grade_type(self, obj):
-        if obj.grade_type:
-            return obj.grade_type.name
-        return None
-
-
 class CourseShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
@@ -208,13 +194,31 @@ class LessonDaySerializer(serializers.ModelSerializer):
         exclude = "course",
 
 
-class CourseListSerializer(serializers.ModelSerializer):
+class LessonDayRetrieveSerializer(serializers.ModelSerializer):
+    coach = CoachClubSerializer()
+
+    class Meta:
+        model = LessonDay
+        exclude = "course",
+
+
+class CourseRetrieveSerializer(serializers.ModelSerializer):
+    grade_type = GradeTypeListSerializer()
+    coaches = CoachClubSerializer(many=True)
+    lesson_days = LessonDayRetrieveSerializer(many=True)
+
+    class Meta:
+        model = Course
+        exclude = ['club']
+
+
+class CourseListMainSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['id', 'name', 'created_at', 'regular_places']
 
 
-class CourseCreateSerializer(serializers.ModelSerializer):
+class CourseCreateMainSerializer(serializers.ModelSerializer):
     lesson_days = LessonDaySerializer(many=True)
 
     class Meta:
@@ -233,6 +237,35 @@ class CourseCreateSerializer(serializers.ModelSerializer):
                 start_time=lesson_day["start_time"],
                 end_time=lesson_day["end_time"]
             )
+
+        Lesson.generate_lessons_for_course(course=course)
+
+        return
+
+
+class CourseUpdateMainSerializer(serializers.ModelSerializer):
+    lesson_days = LessonDaySerializer(many=True)
+
+    class Meta:
+        model = Course
+        exclude = ('club', )
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        lesson_days = validated_data.pop("lesson_days")
+        course = super().update(instance, validated_data)
+
+        for lesson_day in lesson_days:
+            try:
+                old_lesson_day = LessonDay.objects.get(course=instance, weekday=lesson_day.get('weekday'))
+            except:
+                pass
+                # LessonDay.objects.create(
+                #     course=course,
+                #     weekday=lesson_day["weekday"],
+                #     start_time=lesson_day["start_time"],
+                #     end_time=lesson_day["end_time"]
+                # )
 
         Lesson.generate_lessons_for_course(course=course)
 
