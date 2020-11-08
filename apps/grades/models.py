@@ -77,7 +77,7 @@ class Coach(NameModel):
     )
 
     def __str__(self):
-        return self.full_name
+        return f'({self.id}) {self.full_name}'
 
 
 class Course(FreePlacesMixin, TimestampModel):
