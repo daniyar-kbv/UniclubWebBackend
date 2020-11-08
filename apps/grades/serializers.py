@@ -236,7 +236,10 @@ class CourseCreateMainSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         lesson_days = validated_data.pop("lesson_days")
+        coaches = validated_data.pop("coaches")
         course = super().create(validated_data)
+
+        course.coaches.set(coaches)
 
         for lesson_day in lesson_days:
             LessonDay.objects.create(
