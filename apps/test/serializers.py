@@ -76,10 +76,12 @@ class PartnerCreateSerializer(serializers.ModelSerializer):
 class CoachCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coach
-        exclude = ['club']
+        fields = '__all__'
 
     def create(self, validated_data):
-        coach = Coach.objects.create(**validated_data, club=validated_data.get('course').club)
+        print(validated_data)
+
+        coach = Coach.objects.create(**validated_data)
         return coach
 
 
