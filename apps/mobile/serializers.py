@@ -58,7 +58,7 @@ class CourseRetrieveMobileSerializer(CourseListSerializer):
 class AgeGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = AgeGroup
-        fields = ['id', 'name']
+        fields = ['id', 'from_age', 'to_age']
 
 
 class FiltersSerializer(serializers.Serializer):
