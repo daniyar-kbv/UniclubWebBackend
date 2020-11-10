@@ -116,14 +116,6 @@ class AdditionalInformation(models.Model):
         verbose_name='Виды занятий',
         blank=True
     )
-    administrative_division = models.ForeignKey(
-        AdministrativeDivision,
-        on_delete=models.SET_NULL,
-        verbose_name='Административное деление',
-        related_name='clubs',
-        null=True,
-        blank=False
-    )
 
     class Meta:
         abstract = True
