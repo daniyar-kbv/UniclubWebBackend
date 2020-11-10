@@ -24,6 +24,12 @@ class CoursesMobileFilterBackend(BaseFilterBackend):
                 schema=coreschema.Integer()
             ),
             coreapi.Field(
+                name='administrative_division',
+                location='query',
+                required=True,
+                schema=coreschema.Integer()
+            ),
+            coreapi.Field(
                 name='time',
                 location='query',
                 required=False,

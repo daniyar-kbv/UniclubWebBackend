@@ -5,6 +5,7 @@ from apps.grades.models import Lesson, Course, AttendanceType, LessonDay
 from apps.grades.serializers import GradeTypeGroupWithTypesSerializer, AttendanceTypeSerializer, LessonDaySerializer
 from apps.clubs.models import ClubImage
 from apps.core.models import GradeTypeGroup
+from apps.core.serializers import AdministrativeDivisionSerializer
 from .models import AgeGroup
 
 
@@ -64,5 +65,6 @@ class AgeGroupSerializer(serializers.ModelSerializer):
 class FiltersSerializer(serializers.Serializer):
     age_groups = AgeGroupSerializer(many=True)
     attendance_types = AttendanceTypeSerializer(many=True)
+    administrative_divisions = AdministrativeDivisionSerializer(many=True)
     grade_groups = AttendanceTypeSerializer(many=True)
     time_types = serializers.ListField(child=serializers.CharField())

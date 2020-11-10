@@ -45,6 +45,10 @@ class CoursesViewSet(GenericViewSet,
                 pass
         if self.request.query_params.get('attendance_type'):
             queryset = queryset.filter(attendance_type=self.request.query_params.get('attendance_type'))
+        if self.request.query_params.get('administrative_division'):
+            queryset = queryset.filter(
+                club__administrative_division__id=self.request.query_params.get('administrative_division')
+            )
         if self.request.query_params.get('grade_type'):
             queryset = queryset.filter(grade__grade_type__id=self.request.query_params.get('grade_type'))
         if self.request.query_params.get('time'):
