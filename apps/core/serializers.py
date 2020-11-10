@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from . models import CityModel
+from . models import CityModel, AdministrativeDivision
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -14,3 +14,9 @@ class CitySerializer(serializers.ModelSerializer):
 
 class EmptySerializer(serializers.BaseSerializer):
     pass
+
+
+class AdministrativeDivisionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdministrativeDivision
+        fields = ['id', 'name']

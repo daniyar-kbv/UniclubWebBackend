@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db import models
 from django.contrib.auth import get_user_model
 
-from apps.core.models import CityModel, TimestampModel, ReviewMixin, GradeType
+from apps.core.models import CityModel, TimestampModel, ReviewMixin, GradeType, AdministrativeDivision
 
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -115,6 +115,14 @@ class AdditionalInformation(models.Model):
         related_name='clubs',
         verbose_name='Виды занятий',
         blank=True
+    )
+    administrative_division = models.ForeignKey(
+        AdministrativeDivision,
+        on_delete=models.SET_NULL,
+        verbose_name='Административное деление',
+        related_name='clubs',
+        null=True,
+        blank=False
     )
 
     class Meta:

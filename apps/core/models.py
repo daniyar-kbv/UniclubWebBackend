@@ -44,6 +44,23 @@ class CityModel(models.Model):
         return f'({self.id}) {self.name}'
 
 
+class AdministrativeDivision(models.Model):
+    class Meta:
+        verbose_name = 'Административное деление'
+        verbose_name_plural = 'Административные деления'
+
+    name = models.CharField("Название", max_length=256)
+    city = models.ForeignKey(
+        CityModel,
+        on_delete=models.CASCADE,
+        verbose_name='Город',
+        related_name='administrative_divisions'
+    )
+
+    def __str__(self):
+        return f'({self.id}) {self.name}'
+
+
 class ReviewMixin(TimestampModel):
     rating = models.PositiveSmallIntegerField('Рейтинг', default=0)
     advantages = models.TextField('Достоинства', null=True, blank=True)

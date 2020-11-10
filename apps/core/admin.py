@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 
-from .models import CityModel, GradeTypeGroup, GradeType
+from .models import CityModel, GradeTypeGroup, GradeType, AdministrativeDivision
 
 
 class GradeTypeInline(admin.StackedInline):
@@ -30,4 +30,11 @@ class ReadOnlyMixin(ChangeOnlyMixin):
         return False
 
 
-admin.site.register(CityModel)
+class AdministrativeDivisionInline(admin.TabularInline):
+    model = AdministrativeDivision
+    extra = 0
+
+
+@admin.register(CityModel)
+class CityModelAdmin(admin.ModelAdmin):
+    inlines = [AdministrativeDivisionInline]

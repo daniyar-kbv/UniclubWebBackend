@@ -6,7 +6,8 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from rest_framework.response import Response
 
 from apps.website.models import BookingApplication
-from apps.core.models import GradeTypeGroup
+from apps.core.models import GradeTypeGroup, AdministrativeDivision
+from apps.core.serializers import AdministrativeDivisionSerializer
 from apps.grades.models import Lesson, AttendanceType, Course
 from apps.grades.serializers import GradeTypeGroupWithTypesSerializer, AttendanceTypeSerializer
 from .serializers import BookingApplicationCreateSerializer, CourseListSerializer, AgeGroupSerializer, \
@@ -20,7 +21,7 @@ import constants, datetime
 class CoursesViewSet(GenericViewSet,
                      ListModelMixin,
                      RetrieveModelMixin):
-    queryset = Course.objects.all()
+    queryset = Course.objects.filter(club__city__id=2)
     permission_classes = []
     filter_backends = [CoursesMobileFilterBackend]
 
@@ -61,9 +62,12 @@ class CoursesViewSet(GenericViewSet,
         attendance_serializer = AttendanceTypeSerializer(attendance_types, many=True)
         grade_groups = GradeTypeGroup.objects.all()
         grage_serializer = GradeTypeGroupWithTypesSerializer(grade_groups, many=True)
+        administrative_divisions = AdministrativeDivision.objects.filter(city__id=2)
+        administrative_divisions_serializer = AdministrativeDivisionSerializer(administrative_divisions, many=True)
         data = {
             'age_groups': age_serializer.data,
             'attendance_types': attendance_serializer.data,
+            'administrative_divisions': administrative_divisions_serializer.data,
             'grade_groups': grage_serializer.data,
             'time_types': constants.TIMES
         }
