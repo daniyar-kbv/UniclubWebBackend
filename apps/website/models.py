@@ -35,12 +35,12 @@ class PartnerFeedBack(models.Model):
         verbose_name_plural = "Заявки на партнерство"
 
     name = models.CharField("Имя", max_length=256)
-    position = models.CharField("Должность", max_length=256)
+    company_name = models.CharField("Название компании", max_length=256, null=True, blank=False)
     email = models.EmailField("e-mail", null=True, blank=True)
     mobile_phone = PhoneNumberField("Мобильный телефон", null=True, blank=True)
 
     def __str__(self):
-        return f"{self.name}({self.position})"
+        return f"{self.name}({self.company_name})"
 
 
 class BookingApplication(models.Model):
