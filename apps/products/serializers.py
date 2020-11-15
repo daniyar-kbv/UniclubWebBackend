@@ -13,3 +13,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
+
+
+class ProductTypesSerializer(serializers.Serializer):
+    types = serializers.ListField(child=serializers.CharField())

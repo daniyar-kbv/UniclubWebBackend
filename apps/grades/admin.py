@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 
-from .models import Course, GradeType, Lesson, CourseReview, AttendanceType, LessonDay
+from .models import Course, GradeType, Lesson, CourseReview, LessonDay
 from apps.subscriptions.models import LessonBooking
 
 
@@ -46,9 +46,4 @@ class LessonAdmin(admin.ModelAdmin):
 
 @admin.register(CourseReview)
 class CourseReviewAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(AttendanceType)
-class AttendanceTypeAdmin(admin.ModelAdmin):
     pass

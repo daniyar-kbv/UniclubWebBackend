@@ -41,22 +41,3 @@ class PartnerFeedBack(models.Model):
 
     def __str__(self):
         return f"{self.name}({self.company_name})"
-
-
-class BookingApplication(models.Model):
-    first_name = models.CharField('Имя', max_length=100)
-    last_name = models.CharField('Фамилия', max_length=100)
-    phone_number = PhoneNumberField('Номер телефона')
-    email = models.EmailField('Email')
-    lesson_days = models.ManyToManyField(
-        LessonDay,
-        related_name='appilcations',
-        verbose_name='Время занятий'
-    )
-
-    class Meta:
-        verbose_name = 'Заявка на бронирование'
-        verbose_name_plural = 'Заявки на бронирование'
-
-    def __str__(self):
-        return f'({self.id}) {self.first_name} {self.last_name}'

@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import SuspiciousOperation
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
@@ -16,6 +16,7 @@ from apps.users.permissions import IsClient
 from apps.subscriptions.models import LessonBooking
 from apps.core.views import PublicAPIMixin
 from apps.utils import distance
+from apps.products import ProductType
 
 from .models import Course, Lesson, GradeType, CourseReview
 from .serializers import (
@@ -99,6 +100,11 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericV
                 pass
         if self.request.query_params.get('date'):
             queryset = queryset.filter(day=self.request.query_params.get('date'))
+        if self.request.query_params.get('product_type'):
+            if self.request.query_params.get('product_type') == ProductType.UNICLASS:
+                queryset = queryset.filter(uniclass_clients__lt=F('uniclass_places'))
+            elif self.request.query_params.get('product_type') == ProductType.UNIPASS:
+                queryset = queryset.filter(unipass_clients__lt=F('unipass_places'))
         return queryset.distinct()
 
     def list(self, request, *args, **kwargs):

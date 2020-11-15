@@ -47,17 +47,6 @@ class BookedPlacesMixin(models.Model):
         abstract = True
 
 
-class AttendanceType(models.Model):
-    name = models.CharField('Название', max_length=100)
-
-    class Meta:
-        verbose_name = 'Вид посещения'
-        verbose_name_plural = 'Виды посещения'
-
-    def __str__(self):
-        return f'({self.id}) {self.name}'
-
-
 class Coach(NameModel):
     class Meta:
         verbose_name = "Тренеры"
@@ -142,13 +131,6 @@ class Course(FreePlacesMixin, TimestampModel):
     )
     is_certificate = models.BooleanField(
         "Сертификат об окончании курса", default=False, null=True, blank=True
-    )
-    attendance_type = models.ForeignKey(
-        AttendanceType,
-        on_delete=models.SET_NULL,
-        verbose_name='Вид посещения',
-        related_name='courses',
-        null=True
     )
     coaches = models.ManyToManyField(
         Coach,

@@ -3,20 +3,13 @@ from django.db.models import Q
 from rest_framework import serializers
 
 from apps.clubs.models import Club, ClubReview, ClubImage
-from apps.core.models import GradeTypeGroup
 from apps.users.serializers import UserShortSerializer
 from apps.subscriptions.models import LessonBooking
 from apps.products import ProductType
 from apps.utils import general
-from .models import Course, LessonDay, Lesson, GradeType, CourseReview, AttendanceType, Coach
+from .models import Course, LessonDay, Lesson, GradeType, CourseReview, Coach
 
 import constants, datetime
-
-
-class AttendanceTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AttendanceType
-        fields = '__all__'
 
 
 class CoachClubSerializer(serializers.ModelSerializer):
@@ -56,15 +49,7 @@ class ClubRetrieveSerializer(serializers.ModelSerializer):
 class GradeTypeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = GradeType
-        exclude = ['group']
-
-
-class GradeTypeGroupWithTypesSerializer(serializers.ModelSerializer):
-    types = GradeTypeListSerializer(many=True)
-
-    class Meta:
-        model = GradeTypeGroup
-        fields = ['id', 'name', 'types']
+        fields = '__all__'
 
 
 class GradeListSerializer(serializers.ModelSerializer):
@@ -213,7 +198,6 @@ class CourseRetrieveSerializer(serializers.ModelSerializer):
     grade_type = GradeTypeListSerializer()
     coaches = CoachClubSerializer(many=True)
     lesson_days = LessonDayRetrieveSerializer(many=True)
-    attendance_type = AttendanceTypeSerializer()
 
     class Meta:
         model = Course

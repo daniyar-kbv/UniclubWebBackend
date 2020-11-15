@@ -45,7 +45,6 @@ LOCAL_APPS = [
     "apps.sms.apps.SmsConfig",
     "apps.subscriptions.apps.SubscriptionsConfig",
     "apps.test.apps.TestConfig",
-    'apps.mobile.apps.MobileConfig',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -238,9 +237,7 @@ ADMIN_REORDER = (
         'label': 'Основное',
         'models': [
             'core.CityModel',
-            'core.GradeTypeGroup',
-            'mobile.AgeGroup',
-            'grades.AttendanceType',
+            'core.GradeType',
             'products.Product',
             'website.FAQ'
         ]
@@ -282,7 +279,6 @@ ADMIN_REORDER = (
         'app': 'website',
         'label': 'Заявки',
         'models': [
-            'website.BookingApplication',
             'website.PartnerFeedBack',
             'website.FeedBack'
         ]

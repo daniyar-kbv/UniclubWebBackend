@@ -8,8 +8,6 @@ from rest_framework.decorators import action
 
 from .models import CityModel, AdministrativeDivision
 from .serializers import CitySerializer, AdministrativeDivisionSerializer
-from apps.grades.models import AttendanceType
-from apps.grades.serializers import AttendanceTypeSerializer
 
 import constants
 
@@ -51,8 +49,4 @@ class DatesView(PublicAPIMixin, APIView):
             } for i in range(0, 28)]
         )
 
-
-class AttendanceTypeView(PublicAPIMixin, ListAPIView):
-    queryset = AttendanceType.objects.all()
-    serializer_class = AttendanceTypeSerializer
 

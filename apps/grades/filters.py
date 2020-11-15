@@ -59,4 +59,10 @@ class CoursesFilterBackend(BaseFilterBackend):
                 required=False,
                 schema=coreschema.String()
             ),
+            coreapi.Field(
+                name='product_type',
+                location='query',
+                required=False,
+                schema=coreschema.String()
+            ),
         ]
