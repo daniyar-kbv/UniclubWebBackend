@@ -56,6 +56,7 @@ class Coach(NameModel):
         Club, related_name="coaches", on_delete=models.CASCADE, verbose_name="Клуб"
     )
     image = models.ImageField("Фотография", upload_to="coach/", null=True, blank=True)
+    additional_information = models.TextField('Дополнительная информация', null=True, blank=True)
     grade_type = models.ForeignKey(
         GradeType,
         on_delete=models.PROTECT,

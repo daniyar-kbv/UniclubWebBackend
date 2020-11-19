@@ -10,7 +10,7 @@ from apps.grades.models import Course, Lesson
 from apps.clubs.models import Club
 
 from . import (
-    SubscriptionOperations, FreezeRequestDesicion, SubscriptionStatuses, FreezeDuration
+    SubscriptionOperations, FreezeRequestDesicion, SubscriptionStatuses, FreezeDuration, LessonStatuses
 )
 
 import constants
@@ -143,12 +143,13 @@ class LessonBooking(models.Model):
         on_delete=models.CASCADE,
         related_name='bookings',
     )
-    status = models.PositiveSmallIntegerField(
-        'Статус',
-        choices=constants.LESSON_STATUSES,
+    status = models.CharField(
+        "Решение",
+        choices=LessonStatuses.choices,
         default=None,
         null=True,
-        blank=True
+        blank=True,
+        max_length=25
     )
 
     class Meta:

@@ -5,11 +5,13 @@ from .views import (
     SubscribeViewSet,
     SubscribeListView,
     FreezeRequestView,
-    FreezeRequestListView
+    FreezeRequestListView,
+    LessonBookingViewSet
 )
 
 router = DefaultRouter()
 router.register('subscriptions', SubscribeViewSet)
+router.register('lesson_bookings', LessonBookingViewSet)
 
 urlpatterns = [
     path("<uuid:uuid>/freeze", FreezeRequestView.as_view()),

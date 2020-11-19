@@ -30,13 +30,3 @@ WEEKDAYS = (
     (SATURDAY, 'Суббота'),
     (SUNDAY, 'Воскресенье'),
 )
-
-LESSON_ATTENDED = 0
-LESSON_NOT_ATTENDED = 1
-LESSON_CANCELED = 2
-
-LESSON_STATUSES = (
-    (LESSON_ATTENDED, 'Ребенок присутствовал'),
-    (LESSON_NOT_ATTENDED, 'Ребенок отсутствовал'),
-    (LESSON_CANCELED, 'Отменили занятие'),
-)

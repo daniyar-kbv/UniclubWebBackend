@@ -8,6 +8,7 @@ from rest_framework_simplejwt.serializers import PasswordField
 from phonenumber_field.serializerfields import PhoneNumberField
 
 from apps.sms.services import verify_otp
+from .models import PasswordRestoreRequest
 
 User = get_user_model()
 
@@ -84,3 +85,30 @@ class VerifyOTPSerializer(serializers.Serializer):
 class UpdatePasswordSerializer(serializers.Serializer):
     password = PasswordField(required=True)
     password_repeat = PasswordField(required=True)
+
+    def validate(self, attrs):
+        verify_otp(code=attrs["code"], mobile_phone=attrs["mobile_phone"], save=True)
+        return attrs
+
+
+class RestorePasswordRequestSerializer(serializers.Serializer):
+    mobile_phone = PhoneNumberField(label="Номер телефона", required=False)
+
+    def validate(self, attrs):
+        if not User.objects.filter(is_active=True, mobile_phone=attrs.get("mobile_phone")).exists():
+            raise serializers.ValidationError("Пользователь с таким номером телефона не зарегестрирован")
+        return attrs
+
+
+class RestorePasswordSerializer(serializers.Serializer):
+    mobile_phone = PhoneNumberField(label="Номер телефона", required=False)
+    password = PasswordField(required=True)
+    password_repeat = PasswordField(required=True)
+
+    def validate(self, attrs):
+        if PasswordRestoreRequest.objects.active().filter(user__mobile_phone=attrs.get('mobile_phone')).count == 0:
+            raise serializers.ValidationError('Отсутсвует активный запрос на восстановление пароля')
+        return attrs
+
+
+

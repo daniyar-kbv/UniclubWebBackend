@@ -23,7 +23,6 @@ def send_sms(
             raise ValueError("Either content or template_name needs to be provided")
         message = SMSTemplate.objects.get(name=template_name).content
     message = message.format(**kwargs)
-
     if not isinstance(recipients, list):
         recipients = [recipients]
     recipients = ";".join(recipients)

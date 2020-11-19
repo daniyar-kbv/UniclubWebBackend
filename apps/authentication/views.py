@@ -17,8 +17,10 @@ from apps.core.views import PublicAPIMixin
 from apps.sms.services import send_otp
 
 from .serializers import (
-    TokenObtainPairSerializer, RegisterAccountSerializer, VerifyOTPSerializer, UpdatePasswordSerializer
+    TokenObtainPairSerializer, RegisterAccountSerializer, VerifyOTPSerializer, UpdatePasswordSerializer,
+    RestorePasswordSerializer, RestorePasswordRequestSerializer
 )
+from .models import PasswordRestoreRequest
 
 User = get_user_model()
 
@@ -82,6 +84,57 @@ class UpdatePasswordView(ClientAPIMixin, APIView):
         serializer.is_valid(raise_exception=True)
         password = serializer.validated_data.get('password')
         user = request.user
+        user.set_password(password)
+        user.save()
+        return Response(serializer.data)
+
+
+class RequestPasswordRestoreView(PublicAPIMixin, APIView):
+    @swagger_auto_schema(
+        request_body=RestorePasswordRequestSerializer,
+        responses={200: RestorePasswordRequestSerializer}
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = RestorePasswordRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        transaction.on_commit(lambda: send_otp(serializer.validated_data.get('mobile_phone')))
+        return Response()
+
+
+class VerifyRequestPasswordRestoreView(PublicAPIMixin, APIView):
+    @swagger_auto_schema(
+        request_body=VerifyOTPSerializer,
+        responses={200: VerifyOTPSerializer}
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = VerifyOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = User.objects.get(mobile_phone=serializer.validated_data.get('mobile_phone'))
+        except:
+            return Response('Пользователь не найден', status.HTTP_400_BAD_REQUEST)
+        PasswordRestoreRequest.objects.create(user=user)
+        return Response(serializer.data)
+
+
+class PasswordRestoreView(PublicAPIMixin, APIView):
+    @swagger_auto_schema(
+        request_body=RestorePasswordSerializer,
+        responses={200: RestorePasswordSerializer}
+    )
+    def post(self, request, *args, **kwargs):
+        serializer = RestorePasswordSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        try:
+            user = User.objects.get(mobile_phone=serializer.validated_data.get('mobile_phone'))
+        except:
+            return Response('Пользователь не найден', status.HTTP_400_BAD_REQUEST)
+        restore_request = PasswordRestoreRequest.objects.active().filter(user=user).first()
+        restore_request.is_used = True
+        restore_request.save()
+        password = serializer.validated_data.get('password')
         user.set_password(password)
         user.save()
         return Response(serializer.data)

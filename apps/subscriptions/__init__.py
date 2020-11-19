@@ -26,3 +26,9 @@ class SubscriptionStatuses(TextChoices):
     ACTIVE = "ACTIVE", "Активна"
     FROZEN = "FROZEN", "Заморожена"
     INACTIVE = "INACTIVE", "Неактивна"
+
+
+class LessonStatuses(TextChoices):
+    LESSON_ATTENDED = 'LESSON_ATTENDED', 'Ребенок присутствовал'
+    LESSON_NOT_ATTENDED = 'LESSON_NOT_ATTENDED', 'Ребенок отсутствовал'
+    LESSON_CANCELED = 'LESSON_CANCELED', 'Отменили занятие'

@@ -6,7 +6,7 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 
 from apps.users.models import User
-from apps.person.serializers import ClientChildrenSerializer
+from apps.person.serializers import ClientChildrenSerializer, ClientChildrenShortSerializer
 from apps.clubs.serializers import ClubForFilterSerializer
 from apps.grades.serializers import CourseShortSerializer
 from apps.grades.models import Course
@@ -108,3 +108,20 @@ class SubscriptionProfileSerializer(serializers.ModelSerializer):
         serializer = CourseShortSerializer(course)
         return serializer.data if courses.order_by('-attended').first().attended != 0 else None
 
+
+class LessonBookingListSerializer(serializers.ModelSerializer):
+    user = ClientChildrenShortSerializer()
+
+    class Meta:
+        model = LessonBooking
+        fields = ['id', 'user', 'status']
+
+
+class LessonBookingUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonBooking
+        fields = ['status']
+
+
+class LessonStatusesSerializer(serializers.ListSerializer):
+    child = serializers.CharField()

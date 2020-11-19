@@ -64,6 +64,12 @@ class ClientChildrenSerializer(serializers.ModelSerializer):
         }
 
 
+class ClientChildrenShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClientChildren
+        fields = ['id', 'first_name', 'last_name', 'middle_name', 'image']
+
+
 class ScheduleSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         child = self.context.get('child')

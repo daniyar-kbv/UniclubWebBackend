@@ -12,8 +12,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
 from apps.users.views import PartnerAPIMixin, ClientAPIMixin
-from apps.users.permissions import IsClient
+from apps.users.permissions import IsClient, IsPartner
 from apps.subscriptions.models import LessonBooking
+from apps.subscriptions.serializers import LessonBookingListSerializer
 from apps.core.views import PublicAPIMixin
 from apps.utils import distance
 from apps.products import ProductType
@@ -163,6 +164,12 @@ class LessonViewSet(PublicAPIMixin, ListModelMixin, RetrieveModelMixin, GenericV
         serializer = LessonBookingCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, lesson=instance)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'], permission_classes=[IsPartner])
+    def bookings(self, request, pk=None):
+        instance = self.get_object()
+        serializer = LessonBookingListSerializer(instance.bookings, many=True)
         return Response(serializer.data)
 
 
