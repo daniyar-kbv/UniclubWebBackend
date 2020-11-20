@@ -43,8 +43,7 @@ def send_sms(
 
 
 def send_otp(mobile_phone: PhoneNumber):
-    # otp = OTP.generate(mobile_phone)
-    otp = '1111'
+    otp = OTP.generate(mobile_phone)
     send_sms(
         recipients=str(mobile_phone), template_name=SMSType.OTP, kwargs={"otp": otp},
     )

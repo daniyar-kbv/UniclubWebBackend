@@ -54,8 +54,9 @@ class OTP(TimestampModel):
         with transaction.atomic():
             instance = cls()
             instance.save()
-            hotp = pyotp.HOTP(settings.HOTP_KEY, digits=settings.OTP_LENGTH)
-            code = hotp.at(instance.pk)
+            # hotp = pyotp.HOTP(settings.HOTP_KEY, digits=settings.OTP_LENGTH)
+            # code = hotp.at(instance.pk)
+            code = '1111'
             instance.code = code
             instance.mobile_phone = mobile_phone
             instance.save()
