@@ -25,6 +25,7 @@ class LessonDayInline(admin.TabularInline):
 
 class CourceAdmin(admin.ModelAdmin):
     inlines = [LessonDayInline, CourseReviewInline]
+    filter_horizontal = ['coaches']
 
 
 admin.site.register(Course, CourceAdmin)
