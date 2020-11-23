@@ -182,7 +182,7 @@ class Lesson(FreePlacesMixin, BookedPlacesMixin, TimestampModel):
 
     course = models.ForeignKey(
         Course,
-        on_delete=models.PROTECT,
+        on_delete=models.SET_NULL,
         verbose_name="Курс",
         related_name="lessons",
         null=True
