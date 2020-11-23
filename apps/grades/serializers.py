@@ -162,7 +162,7 @@ class LessonRetrieveSerializer(LessonSerializer):
         return review
 
     def get_club(self, obj):
-        serializer = ClubRetrieveSerializer(obj.course.club)
+        serializer = ClubRetrieveSerializer(obj.course.club, context=self.context)
         return serializer.data
 
     def get_course(self, obj):

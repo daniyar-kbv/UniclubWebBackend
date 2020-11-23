@@ -63,7 +63,7 @@ class ClubRetrieveSerializer(serializers.ModelSerializer):
                   "club_admin", "rating", "grades", "coaches", "review"]
 
     def get_grades(self, obj):
-        grades = GradeType.objects.filter(courses__club=obj)
+        grades = GradeType.objects.filter(courses__club=obj).distinct()
         serializer = GradeTypeListSerializer(grades, many=True)
         return serializer.data
 
